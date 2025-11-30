@@ -5,21 +5,29 @@ import {
   HttpStatus,
   Post,
   Redirect,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { AuthenticationService } from './auth.service';
 import SignUpBodyDto from './dto/sign_up.dto';
-import CustomValidationPipe from 'src/common/pipes/validation_custom.pipe';
-import AuthValidator from './auth.validation';
 
+@UsePipes(
+  new ValidationPipe({
+    stopAtFirstError: true,
+    whitelist: true,
+    forbidNonWhitelisted: true,
+  }),
+)
 @Controller('auth')
 class AuthenticationController {
-  constructor(
-    private authenticationService: AuthenticationService,
-  ) {}
+  constructor(private authenticationService: AuthenticationService) {}
   @Post('sign-up')
   signUp(
-    @Body(new CustomValidationPipe(AuthValidator.signUp)) body: SignUpBodyDto,
+    @Body()
+    body: SignUpBodyDto,
   ) {
+    console.log({ body });
+
     const id = this.authenticationService.signUp(body);
     return { message: 'Done', body: { userId: id } };
   }
