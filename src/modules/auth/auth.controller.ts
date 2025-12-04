@@ -3,13 +3,19 @@ import {
   Controller,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
-  Redirect,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthenticationService } from './auth.service';
-import SignUpBodyDto from './dto/sign_up.dto';
+import {
+  ConfirmEmailBodyDto,
+  LoginBodyDto,
+  ResendConfirmEmailBodyDto,
+  SignUpBodyDto,
+} from './dto/auth.dto';
+import { HydratedUser } from 'src/db';
 
 @UsePipes(
   new ValidationPipe({
@@ -21,21 +27,42 @@ import SignUpBodyDto from './dto/sign_up.dto';
 @Controller('auth')
 class AuthenticationController {
   constructor(private authenticationService: AuthenticationService) {}
+
   @Post('sign-up')
-  signUp(
+  async signUp(
     @Body()
     body: SignUpBodyDto,
-  ) {
-    console.log({ body });
+  ): Promise<{ message: string }> {
+    const message = await this.authenticationService.signUp(body);
+    return { message };
+  }
 
-    const id = this.authenticationService.signUp(body);
-    return { message: 'Done', body: { userId: id } };
+  @Post('resend-confirm-email')
+  async resendConfirmEmail(
+    @Body()
+    body: ResendConfirmEmailBodyDto,
+  ): Promise<{ message: string }> {
+    const message = await this.authenticationService.resendConfirmEmail(body);
+    return { message };
+  }
+
+  @Patch('confirm-email')
+  async confirmEmail(
+    @Body()
+    body: ConfirmEmailBodyDto,
+  ): Promise<{ message: string }> {
+    const message = await this.authenticationService.confirmEmail(body);
+    return { message };
   }
 
   @HttpCode(HttpStatus.OK) //@HttpCode(200)
   @Post('log-in')
-  logIn() {
-    return 'Log In';
+  async logIn(@Body() body: LoginBodyDto): Promise<{
+    message: string;
+    body: { accessToken: string; refreshToken: string; user: HydratedUser };
+  }> {
+    const data = await this.authenticationService.logIn(body);
+    return { message: 'Logged In Successfully ✅', body: { ...data } };
   }
 }
 
