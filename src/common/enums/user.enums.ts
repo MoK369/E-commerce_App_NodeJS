@@ -17,3 +17,9 @@ export enum SignatureLevelsEnum {
   bearer = 'Bearer',
   system = 'System',
 }
+
+export enum LogoutStatusEnum {
+  one = 'One',
+  all = 'All',
+  stay = 'Stay',
+}
