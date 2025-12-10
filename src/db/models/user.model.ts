@@ -9,10 +9,11 @@ import { HydratedDocument } from 'mongoose';
 import {
   GenderEnum,
   HashingUtil,
+  LanguagesEnum,
   ProvidersEnum,
   UserRolesEnum,
 } from 'src/common';
-import { HydratedOtp, Otp } from './otp.model';
+import { HydratedOtp } from './otp.model';
 
 @Schema({
   strictQuery: true,
@@ -75,6 +76,13 @@ export class User {
     default: GenderEnum.male,
   })
   gender: GenderEnum;
+
+  @Prop({
+    type: String,
+    enum: Object.values(LanguagesEnum),
+    default: LanguagesEnum.EN,
+  })
+  preferedLanguage: LanguagesEnum;
 
   @Prop({
     type: String,

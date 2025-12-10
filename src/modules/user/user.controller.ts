@@ -1,19 +1,27 @@
-import { Controller, Get, Req } from '@nestjs/common';
-import { TokenTypesEnum, UserRolesEnum, type IAuthRequest } from 'src/common';
-import { ApplyAuthentication, CombinedAuth } from 'src/common/decorators/auths.decorator';
+import { Controller, Get, Headers, Req, UseInterceptors } from '@nestjs/common';
+import { Request } from 'express';
+import { delay, Observable, of } from 'rxjs';
+import { User } from 'src/common';
+import { ApplyAuthentication } from 'src/common/decorators/auths.decorator';
+import { PreferedLanguageInterceptor } from 'src/common/interceptors';
+import type { HydratedUser } from 'src/db';
 
 @Controller('user')
 class UserController {
   constructor() {}
 
-  @CombinedAuth(TokenTypesEnum.refresh,[UserRolesEnum.user])
+  @UseInterceptors(PreferedLanguageInterceptor)
+  @ApplyAuthentication()
   @Get()
-  profile(@Req() request: IAuthRequest) {
-    console.log({ lang: request.headers['accept-language'] });
+  profile(
+    @Headers() headers: Request['headers'],
+    @User() user: HydratedUser,
+  ): Observable<any> {
+    console.log({ lang: headers['accept-language'] });
 
-    console.log({ credentials: request.credentials });
+    console.log({ credentials: user });
 
-    return { message: 'Done ✅' };
+    return of([{ message: 'Done ✅' }]).pipe(delay(12000));
   }
 }
 

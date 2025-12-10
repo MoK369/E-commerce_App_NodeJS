@@ -23,3 +23,8 @@ export enum LogoutStatusEnum {
   all = 'All',
   stay = 'Stay',
 }
+
+export enum LanguagesEnum {
+  EN = 'EN',
+  AR = 'AR',
+}
