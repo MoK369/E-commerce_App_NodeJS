@@ -20,10 +20,13 @@ export function ApplyAuthorization(accessRoles: UserRolesEnum[] = []) {
   );
 }
 
-export function CombinedAuth(
-  tokenType: TokenTypesEnum = TokenTypesEnum.access,
-  accessRoles: UserRolesEnum[] = [],
-) {
+export function CombinedAuth({
+  tokenType = TokenTypesEnum.access,
+  accessRoles,
+}: {
+  tokenType?: TokenTypesEnum;
+  accessRoles: UserRolesEnum[];
+}) {
   return applyDecorators(
     SetTokenType(tokenType),
     SetAccessRoles(accessRoles),

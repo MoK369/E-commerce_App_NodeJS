@@ -1,14 +1,16 @@
 import { MongooseModule, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
+import { IRevokedToken } from 'src/common';
+import { Schema as MongooseSchema } from 'mongoose';
 
 @Schema({
   timestamps: true,
 })
-export class RevokedToken {
+export class RevokedToken implements IRevokedToken {
   @Prop({ type: String, required: true })
   jti: string;
 
-  @Prop({ type: Types.ObjectId, required: true, ref: 'User' })
+  @Prop({ type: MongooseSchema.Types.ObjectId, required: true, ref: 'User' })
   userId: Types.ObjectId;
 
   @Prop({ type: Date, required: true, expires: 0 })

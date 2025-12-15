@@ -6,15 +6,20 @@ import {
   NotFoundException,
   ParseFilePipe,
   Patch,
-  Req,
   UploadedFile,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
-import { delay, Observable, of } from 'rxjs';
-import { FilesMimeTypes, type IMulterFile, StorageTypesEnum, User } from 'src/common';
+import {
+  FilesMimeTypes,
+  type IMulterFile,
+  IResponse,
+  IUser,
+  successResponseHandler,
+  User,
+} from 'src/common';
 import { ApplyAuthentication } from 'src/common/decorators/auths.decorator';
 import { PreferedLanguageInterceptor } from 'src/common/interceptors';
 import {
@@ -22,37 +27,37 @@ import {
   localFileUploadOptions,
 } from 'src/common/utils/multer';
 import type { HydratedUser } from 'src/db';
+import UserService from './user.service';
+import { ProfileResponse } from './entities/user.entity';
 
 @Controller('user')
 class UserController {
-  constructor() {}
+  constructor(private userService: UserService) {}
 
   @UseInterceptors(PreferedLanguageInterceptor)
   @ApplyAuthentication()
   @Get()
-  profile(
+  async profile(
     @Headers() headers: Request['headers'],
-    @User() user: HydratedUser,
-  ): Observable<any> {
+    @User() profile: HydratedUser,
+  ): Promise<IResponse<ProfileResponse>> {
     console.log({ lang: headers['accept-language'] });
 
-    console.log({ credentials: user });
-
-    return of([{ message: 'Done ✅' }]).pipe(delay(12000));
+    return successResponseHandler<ProfileResponse>({ data: { profile } });
   }
 
   @UseInterceptors(
     FileInterceptor(
       'profileImage',
       cloudFileUploadOptions({
-        storageApproach: StorageTypesEnum.disk,
         fileValidation: FilesMimeTypes.images,
       }),
     ),
   )
   @ApplyAuthentication()
   @Patch('profile-image')
-  profileImage(
+  async profileImage(
+    @User() user: HydratedUser,
     @UploadedFile(
       new ParseFilePipe({
         fileIsRequired: true,
@@ -64,9 +69,10 @@ class UserController {
         ],
       }),
     )
-    file: IMulterFile,
-  ) {
-    return { message: 'Done ✅', file };
+    file: Express.Multer.File,
+  ): Promise<{ message: string; profileImage: IUser['profileImage'] }> {
+    const profileImage = await this.userService.profileImage(file, user);
+    return { message: 'Done ✅', profileImage };
   }
 
   @UseInterceptors(

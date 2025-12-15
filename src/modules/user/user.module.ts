@@ -3,9 +3,7 @@ import UserController from './user.controller';
 import UserService from './user.service';
 import { preAuthMiddleware } from 'src/common/middlewares/authentication.middleware';
 import { SharedAuthenticationModule } from 'src/common/modules';
-import { MulterModule } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { IdService } from 'src/common';
+import { S3KeyService, S3Service } from 'src/common';
 
 @Module({
   imports: [
@@ -27,7 +25,7 @@ import { IdService } from 'src/common';
   ],
   exports: [],
   controllers: [UserController],
-  providers: [UserService],
+  providers: [UserService, S3Service, S3KeyService],
 })
 class UserModule implements NestModule {
   // configure(consumer: MiddlewareConsumer) {
