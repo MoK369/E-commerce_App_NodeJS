@@ -60,6 +60,7 @@ class TokenService {
   getSignatureLevel({ role }: { role: UserRolesEnum }): SignatureLevelsEnum {
     switch (role) {
       case UserRolesEnum.admin:
+      case UserRolesEnum.superAdmin:
         return SignatureLevelsEnum.system;
 
       default:
@@ -75,8 +76,8 @@ class TokenService {
     switch (signatureLevel) {
       case SignatureLevelsEnum.system:
         return {
-          accessSignature: process.env.ACCESS_SYSTEM_TOKEN_SIGNATURE!,
-          refreshSignatrue: process.env.REFRESH_SYSTEM_TOKEN_SIGNATURE!,
+          accessSignature: process.env.ACCESS_ADMIN_TOKEN_SIGNATURE!,
+          refreshSignatrue: process.env.REFRESH_ADMIN_TOKEN_SIGNATURE!,
         };
 
       default:
@@ -99,6 +100,10 @@ class TokenService {
     return {
       accessToken: await this.generate({
         payload: { sub: user.id, jti },
+        options: {
+          secret: signatures.accessSignature,
+          expiresIn: Number(process.env.REFRESH_TOKEN_EXPIRES_IN),
+        },
       }),
       refreshToken: await this.generate({
         payload: { sub: user.id, jti },

@@ -1,41 +1,33 @@
-import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import UserController from './user.controller';
 import UserService from './user.service';
-import {
-  IdService,
-  setDefaultLanguageMiddlware,
-  TokenTypesEnum,
-} from 'src/common';
-import {
-  OtpModel,
-  OtpRepository,
-  RevokedTokenModel,
-  RevokedTokenRepository,
-  UserModel,
-  UserRepository,
-} from 'src/db';
-import {
-  AuthenticationMiddleware,
-  preAuthMiddleware,
-} from 'src/common/middlewares/authentication.middleware';
-import TokenService from 'src/common/utils/security/token.security';
-import { JwtService } from '@nestjs/jwt';
+import { preAuthMiddleware } from 'src/common/middlewares/authentication.middleware';
+import { SharedAuthenticationModule } from 'src/common/modules';
+import { S3KeyService, S3Service } from 'src/common';
 
 @Module({
-  imports: [UserModel, OtpModel, RevokedTokenModel],
+  imports: [
+    SharedAuthenticationModule,
+    // MulterModule.register({
+    //   storage: diskStorage({
+    //     destination(req, file, callback) {
+    //       callback(null, './uploads');
+    //     },
+    //     filename(req, file, callback) {
+    //       const idService = new IdService();
+    //       callback(
+    //         null,
+    //         `${idService.generateAlphaNumaricId()}_${file.originalname}`,
+    //       );
+    //     },
+    //   }),
+    // }),
+  ],
   exports: [],
   controllers: [UserController],
-  providers: [
-    UserService,
-    UserRepository,
-    OtpRepository,
-    IdService,
-    JwtService,
-    RevokedTokenRepository,
-    TokenService,
-  ],
+  providers: [UserService, S3Service, S3KeyService],
 })
-class UserModule {
+class UserModule implements NestModule {
   // configure(consumer: MiddlewareConsumer) {
   //   consumer
   //     .apply(
@@ -45,6 +37,10 @@ class UserModule {
   //     )
   //     .forRoutes(UserController);
   // }
+
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(preAuthMiddleware()).forRoutes(UserController);
+  }
 }
 
 export default UserModule;

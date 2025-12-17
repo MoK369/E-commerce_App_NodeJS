@@ -1,27 +1,16 @@
-import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import AuthenticationController from './auth.controller';
 import { AuthenticationService } from './auth.service';
-import { UserRepository, UserModel, OtpModel, RevokedTokenModel, RevokedTokenRepository } from 'src/db';
+import { OtpModel } from 'src/db';
 import OtpRepository from 'src/db/repositories/otp.repository';
-import { IdService } from 'src/common';
-import { JwtService } from '@nestjs/jwt';
-import TokenService from 'src/common/utils/security/token.security';
+import { SharedAuthenticationModule } from 'src/common/modules';
 
 @Module({
-  imports: [UserModel, OtpModel, RevokedTokenModel],
+  imports: [SharedAuthenticationModule, OtpModel],
   exports: [],
   controllers: [AuthenticationController],
-  providers: [
-    AuthenticationService,
-    UserRepository,
-    OtpRepository,
-    RevokedTokenRepository,
-    IdService,
-    JwtService,
-    TokenService,
-  ],
+  providers: [AuthenticationService, OtpRepository],
 })
-class AuthenticationModule {
-}
+class AuthenticationModule {}
 
 export default AuthenticationModule;

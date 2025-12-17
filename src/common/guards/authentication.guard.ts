@@ -1,6 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Request } from 'express';
-import { Observable } from 'rxjs';
 import TokenService from '../utils/security/token.security';
 import { Reflector } from '@nestjs/core';
 import { TokenTypesEnum } from '../enums';

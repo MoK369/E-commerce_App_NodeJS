@@ -11,6 +11,7 @@ export enum GenderEnum {
 export enum UserRolesEnum {
   user = 'User',
   admin = 'Admin',
+  superAdmin = 'SuperAdmin',
 }
 
 export enum SignatureLevelsEnum {
@@ -22,4 +23,9 @@ export enum LogoutStatusEnum {
   one = 'One',
   all = 'All',
   stay = 'Stay',
+}
+
+export enum LanguagesEnum {
+  EN = 'EN',
+  AR = 'AR',
 }

@@ -7,6 +7,8 @@ import { resolve } from 'node:path';
 import UserModule from './modules/user/user.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RouterModule } from '@nestjs/core';
+import { IdService, S3KeyService, S3Service } from './common';
+import BrandModule from './modules/brand/brand.module';
 
 @Module({
   imports: [
@@ -20,13 +22,14 @@ import { RouterModule } from '@nestjs/core';
     RouterModule.register([
       {
         path: 'api/v1',
-        children: [AuthenticationModule, UserModule],
+        children: [AuthenticationModule, UserModule, BrandModule],
       },
     ]),
     AuthenticationModule,
     UserModule,
+    BrandModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, S3Service, IdService, S3KeyService],
 })
 export class AppModule {}

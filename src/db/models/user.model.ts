@@ -9,10 +9,12 @@ import { HydratedDocument } from 'mongoose';
 import {
   GenderEnum,
   HashingUtil,
+  IUser,
+  LanguagesEnum,
   ProvidersEnum,
   UserRolesEnum,
 } from 'src/common';
-import { HydratedOtp, Otp } from './otp.model';
+import { HydratedOtp } from './otp.model';
 
 @Schema({
   strictQuery: true,
@@ -20,7 +22,7 @@ import { HydratedOtp, Otp } from './otp.model';
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 })
-export class User {
+export class User implements IUser {
   @Prop({
     type: String,
     required: true,
@@ -67,7 +69,7 @@ export class User {
     enum: Object.values(ProvidersEnum),
     default: ProvidersEnum.local,
   })
-  provider: string;
+  provider: ProvidersEnum;
 
   @Prop({
     type: String,
@@ -75,6 +77,13 @@ export class User {
     default: GenderEnum.male,
   })
   gender: GenderEnum;
+
+  @Prop({
+    type: String,
+    enum: Object.values(LanguagesEnum),
+    default: LanguagesEnum.EN,
+  })
+  preferedLanguage: LanguagesEnum;
 
   @Prop({
     type: String,
@@ -89,6 +98,17 @@ export class User {
   @Prop({ type: Date })
   changeCredentialsTime: Date;
 
+  @Prop({
+    type: {
+      url: String,
+      provider: {
+        type: String,
+        enum: Object.values(ProvidersEnum),
+      },
+    },
+  })
+  profileImage: { url: string; provider: ProvidersEnum };
+
   @Virtual()
   otps: HydratedOtp[];
 }
@@ -101,6 +121,10 @@ userSchema.virtual('otps', {
   localField: '_id',
   foreignField: 'createdBy',
   ref: 'Otp',
+});
+
+userSchema.virtual('id').get(function () {
+  return this._id;
 });
 
 export const UserModel = MongooseModule.forFeatureAsync([

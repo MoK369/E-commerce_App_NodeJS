@@ -2,8 +2,7 @@ import { applyDecorators, UseGuards } from '@nestjs/common';
 import { TokenTypesEnum, UserRolesEnum } from '../enums';
 import SetTokenType from './token_type.decorator';
 import SetAccessRoles from './set_access_roles.decorator';
-import AuthenticationGuard from '../guards/authentication.guard';
-import AuthorizationGuard from '../guards/authorization.guard';
+import { AuthenticationGuard, AuthorizationGuard } from '../guards';
 
 export function ApplyAuthentication(
   tokenType: TokenTypesEnum = TokenTypesEnum.access,
@@ -21,10 +20,13 @@ export function ApplyAuthorization(accessRoles: UserRolesEnum[] = []) {
   );
 }
 
-export function CombinedAuth(
-  tokenType: TokenTypesEnum = TokenTypesEnum.access,
-  accessRoles: UserRolesEnum[] = [],
-) {
+export function CombinedAuth({
+  tokenType = TokenTypesEnum.access,
+  accessRoles,
+}: {
+  tokenType?: TokenTypesEnum;
+  accessRoles: UserRolesEnum[];
+}) {
   return applyDecorators(
     SetTokenType(tokenType),
     SetAccessRoles(accessRoles),

@@ -1,5 +1,4 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { Observable } from 'rxjs';
 import { UserRolesEnum } from '../enums';
 import { Request } from 'express';
 import { IAuthRequest } from '../interfaces';
