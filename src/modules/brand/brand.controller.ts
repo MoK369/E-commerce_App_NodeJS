@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Param,
   ParseFilePipe,
+  Patch,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -16,7 +18,11 @@ import {
   successResponseHandler,
   User,
 } from 'src/common';
-import { CreateBrandDto } from './dto/brand.dto';
+import {
+  BrandParamsDto,
+  CreateBrandDto,
+  UpdateBrandDto,
+} from './dto/brand.dto';
 import type { HydratedUser } from 'src/db';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateBrandResponse } from './entities/brand.entity';
@@ -49,6 +55,17 @@ class BrandController {
   ): Promise<IResponse<CreateBrandResponse>> {
     const brand = await this._brandService.createBrand({ body, file, user });
     return successResponseHandler<CreateBrandResponse>({ data: { brand } });
+  }
+
+  @CombinedAuth({ accessRoles: authorizationEndpoints.updateBrand })
+  @Patch(':brandId')
+  async updateBrand(
+    @Param() params: BrandParamsDto,
+    @Body() body: UpdateBrandDto,
+  ) {
+    console.log("inside updateBrand");
+    
+    return this._brandService.updateBrand({ brandId: params.brandId, body });
   }
 }
 

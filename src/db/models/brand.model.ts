@@ -27,6 +27,12 @@ export class Brand implements IBrand {
 
   @Prop({ type: MongooseSchema, ref: 'User' })
   updatedBy: Types.ObjectId;
+
+  @Prop({ type: Date })
+  freezedAt?: Date;
+
+  @Prop({ type: Date })
+  restoredAt?: Date;
 }
 
 export type HydratedBrand = HydratedDocument<Brand>;

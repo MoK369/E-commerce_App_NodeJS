@@ -4,8 +4,9 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { BrandRepository, HydratedBrand, HydratedUser } from 'src/db';
-import { CreateBrandDto } from './dto/brand.dto';
+import { CreateBrandDto, UpdateBrandDto } from './dto/brand.dto';
 import { S3Service } from 'src/common';
+import { Types } from 'mongoose';
 
 @Injectable()
 class BrandService {
@@ -48,6 +49,8 @@ class BrandService {
     }
     return brand;
   }
+
+  async updateBrand({brandId,body}: { brandId: Types.ObjectId; body: UpdateBrandDto }) {}
 }
 
 export default BrandService;
