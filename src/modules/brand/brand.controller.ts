@@ -1,10 +1,13 @@
 import {
   Body,
   Controller,
+  Delete,
+  Get,
   Param,
   ParseFilePipe,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
   UsePipes,
@@ -21,11 +24,16 @@ import {
 import {
   BrandParamsDto,
   CreateBrandDto,
+  GetAllBrandDto,
   UpdateBrandDto,
 } from './dto/brand.dto';
 import type { HydratedUser } from 'src/db';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { CreateBrandResponse } from './entities/brand.entity';
+import {
+  BrandResponse,
+  FindAllBrandsResponse,
+  UpdateBrandImageResponse,
+} from './entities/brand.entity';
 import { CombinedAuth } from 'src/common/decorators/auths.decorator';
 import { authorizationEndpoints } from './brand.authorization';
 
@@ -46,26 +54,139 @@ class BrandController {
       cloudFileUploadOptions({ fileValidation: FilesMimeTypes.images }),
     ),
   )
-  @CombinedAuth({ accessRoles: authorizationEndpoints.createBrand })
+  @CombinedAuth({ accessRoles: authorizationEndpoints.createAndUpdateBrand })
   @Post()
   async createBrand(
     @User() user: HydratedUser,
     @Body() body: CreateBrandDto,
     @UploadedFile(ParseFilePipe) file: Express.Multer.File,
-  ): Promise<IResponse<CreateBrandResponse>> {
+  ): Promise<IResponse<BrandResponse>> {
     const brand = await this._brandService.createBrand({ body, file, user });
-    return successResponseHandler<CreateBrandResponse>({ data: { brand } });
+    return successResponseHandler<BrandResponse>({ data: { brand } });
   }
 
-  @CombinedAuth({ accessRoles: authorizationEndpoints.updateBrand })
+  @UseInterceptors(
+    FileInterceptor(
+      'image',
+      cloudFileUploadOptions({ fileValidation: FilesMimeTypes.images }),
+    ),
+  )
+  @CombinedAuth({ accessRoles: authorizationEndpoints.createAndUpdateBrand })
+  @Patch(':brandId/image')
+  async updateBrandImage(
+    @Param() params: BrandParamsDto,
+    @UploadedFile(ParseFilePipe) file: Express.Multer.File,
+    @User() user: HydratedUser,
+  ): Promise<IResponse<UpdateBrandImageResponse>> {
+    const image = await this._brandService.updateBrandImage({
+      user,
+      brandId: params.brandId,
+      image: file,
+    });
+
+    return successResponseHandler<UpdateBrandImageResponse>({
+      data: { image },
+    });
+  }
+
+  @CombinedAuth({ accessRoles: authorizationEndpoints.createAndUpdateBrand })
+  @Patch(':brandId/restore')
+  async restoreBrand(
+    @Param() params: BrandParamsDto,
+    @User() user: HydratedUser,
+  ): Promise<IResponse<BrandResponse>> {
+    const brand = await this._brandService.restoreBrand({
+      brandId: params.brandId,
+      user,
+    });
+
+    return successResponseHandler<BrandResponse>({
+      message: 'Brand restored successfully ✅',
+      data: { brand },
+    });
+  }
+
+  @CombinedAuth({ accessRoles: authorizationEndpoints.createAndUpdateBrand })
   @Patch(':brandId')
   async updateBrand(
     @Param() params: BrandParamsDto,
     @Body() body: UpdateBrandDto,
-  ) {
-    console.log("inside updateBrand");
-    
-    return this._brandService.updateBrand({ brandId: params.brandId, body });
+    @User() user: HydratedUser,
+  ): Promise<IResponse<BrandResponse>> {
+    const brand = await this._brandService.updateBrand({
+      user,
+      brandId: params.brandId,
+      body,
+    });
+
+    return successResponseHandler<BrandResponse>({ data: { brand } });
+  }
+
+  @CombinedAuth({ accessRoles: authorizationEndpoints.createAndUpdateBrand })
+  @Delete(':brandId/freeze')
+  async freezeBrand(
+    @Param() params: BrandParamsDto,
+    @User() user: HydratedUser,
+  ): Promise<IResponse> {
+    await this._brandService.freezeBrand({ brandId: params.brandId, user });
+
+    return successResponseHandler({ message: 'Brand freezed successfully ✅' });
+  }
+
+  @CombinedAuth({ accessRoles: authorizationEndpoints.createAndUpdateBrand })
+  @Delete(':brandId')
+  async removeBrand(@Param() params: BrandParamsDto): Promise<IResponse> {
+    await this._brandService.removeBrand({ brandId: params.brandId });
+
+    return successResponseHandler({ message: 'Brand removed successfully ✅' });
+  }
+
+  @Get()
+  async findAllBrands(
+    @Query() queryParams: GetAllBrandDto,
+  ): Promise<IResponse<FindAllBrandsResponse>> {
+    const result = await this._brandService.findAllBrands({ queryParams });
+    return successResponseHandler<FindAllBrandsResponse>({ data: result });
+  }
+
+  @CombinedAuth({ accessRoles: authorizationEndpoints.createAndUpdateBrand })
+  @Get('/archives')
+  async findAllArchives(
+    @Query() queryParams: GetAllBrandDto,
+  ): Promise<IResponse<FindAllBrandsResponse>> {
+    const result = await this._brandService.findAllBrands({
+      queryParams,
+      archived: true,
+    });
+    return successResponseHandler<FindAllBrandsResponse>({ data: result });
+  }
+
+  @CombinedAuth({ accessRoles: authorizationEndpoints.createAndUpdateBrand })
+  @Get(':brandId/archived')
+  async findArchivedBrand(
+    @Param() params: BrandParamsDto,
+  ): Promise<IResponse<BrandResponse>> {
+    return successResponseHandler<BrandResponse>({
+      data: {
+        brand: await this._brandService.findOneBrand({
+          brandId: params.brandId,
+          archived: true,
+        }),
+      },
+    });
+  }
+
+  @Get(':brandId')
+  async findBrand(
+    @Param() params: BrandParamsDto,
+  ): Promise<IResponse<BrandResponse>> {
+    return successResponseHandler<BrandResponse>({
+      data: {
+        brand: await this._brandService.findOneBrand({
+          brandId: params.brandId,
+        }),
+      },
+    });
   }
 }
 

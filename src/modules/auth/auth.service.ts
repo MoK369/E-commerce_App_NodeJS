@@ -19,7 +19,7 @@ import {
 } from 'src/common';
 import OtpRepository from 'src/db/repositories/otp.repository';
 import { Types } from 'mongoose';
-import TokenService from 'src/common/utils/security/token.security';
+import TokenService from 'src/common/services/security/token.security';
 
 @Injectable()
 export class AuthenticationService {

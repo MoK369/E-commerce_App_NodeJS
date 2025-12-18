@@ -102,7 +102,7 @@ class TokenService {
         payload: { sub: user.id, jti },
         options: {
           secret: signatures.accessSignature,
-          expiresIn: Number(process.env.REFRESH_TOKEN_EXPIRES_IN),
+          expiresIn: Number(process.env.ACCESS_TOKEN_EXPIRES_IN),
         },
       }),
       refreshToken: await this.generate({

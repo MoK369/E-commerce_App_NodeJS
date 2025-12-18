@@ -1,5 +1,17 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { Allow, IsMongoId, IsString, MaxLength, MinLength } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  Allow,
+  IsInt,
+  IsMongoId,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import { Types } from 'mongoose';
 import { ContainField, IBrand } from 'src/common';
 
@@ -21,8 +33,25 @@ export class BrandParamsDto {
 }
 
 @ContainField()
-export class UpdateBrandDto extends PartialType(CreateBrandDto) {
+export class UpdateBrandDto extends PartialType(CreateBrandDto) {}
 
-  @Allow()
-  extra:any
+export class GetAllBrandDto {
+  @Type(() => Number)
+  @IsInt()
+  @IsPositive()
+  @IsNumber()
+  @IsOptional()
+  page: number;
+
+  @Type(() => Number)
+  @IsInt()
+  @IsPositive()
+  @IsNumber()
+  @IsOptional()
+  size: number;
+
+  @IsNotEmpty()
+  @IsString()
+  @IsOptional()
+  searchKey: string;
 }

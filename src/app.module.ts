@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import AuthenticationModule from './modules/auth/auth.module';
@@ -7,7 +7,12 @@ import { resolve } from 'node:path';
 import UserModule from './modules/user/user.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RouterModule } from '@nestjs/core';
-import { IdService, S3KeyService, S3Service } from './common';
+import {
+  IdService,
+  S3KeyService,
+  S3Service,
+  setProtocolAndHostMiddleware,
+} from './common';
 import BrandModule from './modules/brand/brand.module';
 
 @Module({
@@ -32,4 +37,10 @@ import BrandModule from './modules/brand/brand.module';
   controllers: [AppController],
   providers: [AppService, S3Service, IdService, S3KeyService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(setProtocolAndHostMiddleware)
+      .forRoutes('api/v1', AppController);
+  }
+}
