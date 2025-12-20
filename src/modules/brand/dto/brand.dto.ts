@@ -1,7 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { Type } from 'class-transformer';
 import {
-  Allow,
   IsInt,
   IsMongoId,
   IsNotEmpty,
@@ -35,7 +34,7 @@ export class BrandParamsDto {
 @ContainField()
 export class UpdateBrandDto extends PartialType(CreateBrandDto) {}
 
-export class GetAllBrandDto {
+export class GetAllBrandsDto {
   @Type(() => Number)
   @IsInt()
   @IsPositive()

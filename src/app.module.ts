@@ -14,6 +14,8 @@ import {
   setProtocolAndHostMiddleware,
 } from './common';
 import BrandModule from './modules/brand/brand.module';
+import CategoryModule from './modules/category/category.module';
+import ProductModule from './modules/product/product.module';
 
 @Module({
   imports: [
@@ -27,17 +29,23 @@ import BrandModule from './modules/brand/brand.module';
     RouterModule.register([
       {
         path: 'api/v1',
-        children: [AuthenticationModule, UserModule, BrandModule],
+        children: AppModule.modules,
       },
     ]),
-    AuthenticationModule,
-    UserModule,
-    BrandModule,
+    ...AppModule.modules,
   ],
   controllers: [AppController],
   providers: [AppService, S3Service, IdService, S3KeyService],
 })
 export class AppModule implements NestModule {
+  static modules = [
+    AuthenticationModule,
+    UserModule,
+    BrandModule,
+    CategoryModule,
+    ProductModule,
+  ];
+
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(setProtocolAndHostMiddleware)

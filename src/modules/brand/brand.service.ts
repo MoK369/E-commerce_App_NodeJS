@@ -8,7 +8,7 @@ import {
 import { BrandRepository, HydratedBrand, HydratedUser } from 'src/db';
 import {
   CreateBrandDto,
-  GetAllBrandDto,
+  GetAllBrandsDto,
   UpdateBrandDto,
 } from './dto/brand.dto';
 import {
@@ -125,7 +125,7 @@ class BrandService {
       }),
     ]);
 
-    await brand.updateOne({ image: newSubKey });
+    await brand.updateOne({ image: newSubKey, updatedBy: user._id });
 
     return this._s3KeyService.generateS3UploadsUrlFromSubKey({
       req: { host: process.env.HOST!, protocol: process.env.PROTOCOL! },
@@ -195,7 +195,7 @@ class BrandService {
     queryParams,
     archived = false,
   }: {
-    queryParams: GetAllBrandDto;
+    queryParams: GetAllBrandsDto;
     archived?: boolean;
   }): Promise<IPaginationResult<HydratedBrand>> {
     const result = await this._brandRepository.paginate({

@@ -125,23 +125,30 @@ abstract class DatabaseRepository<
     );
   };
 
-  updateOne = async ({
+  updateOne = async <TUpdate extends UpdateType = Record<string, any>>({
     filter = {},
     update,
     options = {},
   }: {
     filter?: RootFilterQuery<TRawDocument>;
-    update: UpdateQuery<TDocument> | UpdateWithAggregationPipeline;
+    update: UpdateFunctionsUpdateObjectType<TDocument, TUpdate>;
     options?: MongooseUpdateQueryOptions<TDocument>;
   }): Promise<UpdateWriteOpResult> => {
-    return this.model.updateOne(
-      filter,
-      { ...update, $inc: { __v: 1 } },
-      options,
-    );
+    let toUpdateObject: UpdateFunctionsUpdateObjectType<TDocument, TUpdate>;
+    if (Array.isArray(update)) {
+      update.push({
+        $set: {
+          __v: { $add: ['$__v', 1] },
+        },
+      });
+      toUpdateObject = update;
+    } else {
+      toUpdateObject = { ...update, $inc: { __v: 1 } };
+    }
+    return this.model.updateOne(filter, toUpdateObject, options);
   };
 
-  updateById = async <TUpdate extends UpdateType>({
+  updateById = async <TUpdate extends UpdateType = Record<string, any>>({
     id,
     update,
     options = {},
@@ -150,7 +157,7 @@ abstract class DatabaseRepository<
     update: UpdateFunctionsUpdateObjectType<TDocument, TUpdate>;
     options?: MongooseUpdateQueryOptions<TDocument>;
   }): Promise<UpdateWriteOpResult> => {
-    let toUpdateObject: UpdateFunctionsUpdateObjectType<TDocument,TUpdate>;
+    let toUpdateObject: UpdateFunctionsUpdateObjectType<TDocument, TUpdate>;
     if (Array.isArray(update)) {
       update.push({
         $set: {
@@ -164,20 +171,30 @@ abstract class DatabaseRepository<
     return this.model.updateOne({ _id: id }, toUpdateObject, options);
   };
 
-  findOneAndUpdate = async <TLean extends boolean = false>({
+  findOneAndUpdate = async <
+    TUpdate extends UpdateType = Record<string, any>,
+    TLean extends boolean = false,
+  >({
     filter = {},
     update,
     options = { new: true },
   }: {
     filter?: RootFilterQuery<TRawDocument>;
-    update: UpdateQuery<TDocument>;
+    update: UpdateFunctionsUpdateObjectType<TDocument, TUpdate>;
     options?: FindFunctionOptionsType<TDocument, TLean>;
   }): Promise<FindFunctionsReturnType<TDocument, TLean>> => {
-    return this.model.findOneAndUpdate(
-      filter,
-      { ...update, $inc: { __v: 1 } },
-      options,
-    );
+    let toUpdateObject: UpdateFunctionsUpdateObjectType<TDocument, TUpdate>;
+    if (Array.isArray(update)) {
+      update.push({
+        $set: {
+          __v: { $add: ['$__v', 1] },
+        },
+      });
+      toUpdateObject = update;
+    } else {
+      toUpdateObject = { ...update, $inc: { __v: 1 } };
+    }
+    return this.model.findOneAndUpdate(filter, toUpdateObject, options);
   };
 
   findByIdAndUpdate = async <TLean extends LeanType = false>({

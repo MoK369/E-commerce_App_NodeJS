@@ -1,5 +1,5 @@
 import { UserRolesEnum } from 'src/common';
 
-export const authorizationEndpoints = {
+export const brandAuthorizationEndpoints = {
   createAndUpdateBrand: [UserRolesEnum.admin, UserRolesEnum.superAdmin],
 };

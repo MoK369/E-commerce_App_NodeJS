@@ -24,7 +24,7 @@ import {
 import {
   BrandParamsDto,
   CreateBrandDto,
-  GetAllBrandDto,
+  GetAllBrandsDto,
   UpdateBrandDto,
 } from './dto/brand.dto';
 import type { HydratedUser } from 'src/db';
@@ -35,7 +35,7 @@ import {
   UpdateBrandImageResponse,
 } from './entities/brand.entity';
 import { CombinedAuth } from 'src/common/decorators/auths.decorator';
-import { authorizationEndpoints } from './brand.authorization';
+import { brandAuthorizationEndpoints } from './brand.authorization';
 
 @UsePipes(
   new ValidationPipe({
@@ -54,7 +54,7 @@ class BrandController {
       cloudFileUploadOptions({ fileValidation: FilesMimeTypes.images }),
     ),
   )
-  @CombinedAuth({ accessRoles: authorizationEndpoints.createAndUpdateBrand })
+  @CombinedAuth({ accessRoles: brandAuthorizationEndpoints.createAndUpdateBrand })
   @Post()
   async createBrand(
     @User() user: HydratedUser,
@@ -71,7 +71,7 @@ class BrandController {
       cloudFileUploadOptions({ fileValidation: FilesMimeTypes.images }),
     ),
   )
-  @CombinedAuth({ accessRoles: authorizationEndpoints.createAndUpdateBrand })
+  @CombinedAuth({ accessRoles: brandAuthorizationEndpoints.createAndUpdateBrand })
   @Patch(':brandId/image')
   async updateBrandImage(
     @Param() params: BrandParamsDto,
@@ -89,7 +89,7 @@ class BrandController {
     });
   }
 
-  @CombinedAuth({ accessRoles: authorizationEndpoints.createAndUpdateBrand })
+  @CombinedAuth({ accessRoles: brandAuthorizationEndpoints.createAndUpdateBrand })
   @Patch(':brandId/restore')
   async restoreBrand(
     @Param() params: BrandParamsDto,
@@ -106,7 +106,7 @@ class BrandController {
     });
   }
 
-  @CombinedAuth({ accessRoles: authorizationEndpoints.createAndUpdateBrand })
+  @CombinedAuth({ accessRoles: brandAuthorizationEndpoints.createAndUpdateBrand })
   @Patch(':brandId')
   async updateBrand(
     @Param() params: BrandParamsDto,
@@ -122,7 +122,7 @@ class BrandController {
     return successResponseHandler<BrandResponse>({ data: { brand } });
   }
 
-  @CombinedAuth({ accessRoles: authorizationEndpoints.createAndUpdateBrand })
+  @CombinedAuth({ accessRoles: brandAuthorizationEndpoints.createAndUpdateBrand })
   @Delete(':brandId/freeze')
   async freezeBrand(
     @Param() params: BrandParamsDto,
@@ -133,7 +133,7 @@ class BrandController {
     return successResponseHandler({ message: 'Brand freezed successfully ✅' });
   }
 
-  @CombinedAuth({ accessRoles: authorizationEndpoints.createAndUpdateBrand })
+  @CombinedAuth({ accessRoles: brandAuthorizationEndpoints.createAndUpdateBrand })
   @Delete(':brandId')
   async removeBrand(@Param() params: BrandParamsDto): Promise<IResponse> {
     await this._brandService.removeBrand({ brandId: params.brandId });
@@ -143,16 +143,16 @@ class BrandController {
 
   @Get()
   async findAllBrands(
-    @Query() queryParams: GetAllBrandDto,
+    @Query() queryParams: GetAllBrandsDto,
   ): Promise<IResponse<FindAllBrandsResponse>> {
     const result = await this._brandService.findAllBrands({ queryParams });
     return successResponseHandler<FindAllBrandsResponse>({ data: result });
   }
 
-  @CombinedAuth({ accessRoles: authorizationEndpoints.createAndUpdateBrand })
+  @CombinedAuth({ accessRoles: brandAuthorizationEndpoints.createAndUpdateBrand })
   @Get('/archives')
   async findAllArchives(
-    @Query() queryParams: GetAllBrandDto,
+    @Query() queryParams: GetAllBrandsDto,
   ): Promise<IResponse<FindAllBrandsResponse>> {
     const result = await this._brandService.findAllBrands({
       queryParams,
@@ -161,7 +161,7 @@ class BrandController {
     return successResponseHandler<FindAllBrandsResponse>({ data: result });
   }
 
-  @CombinedAuth({ accessRoles: authorizationEndpoints.createAndUpdateBrand })
+  @CombinedAuth({ accessRoles: brandAuthorizationEndpoints.createAndUpdateBrand })
   @Get(':brandId/archived')
   async findArchivedBrand(
     @Param() params: BrandParamsDto,
