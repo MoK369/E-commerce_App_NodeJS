@@ -6,7 +6,7 @@ import { Model } from 'mongoose';
 
 @Injectable()
 class ProductRepository extends DatabaseRepository<TRawDocument> {
-  constructor(@InjectModel(TRawDocument.name) model: Model<TDocument>) {
+  constructor(@InjectModel("Product") model: Model<TDocument>) {
     super(model);
   }
 }

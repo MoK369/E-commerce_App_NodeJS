@@ -9,13 +9,14 @@ import {
 } from 'mongoose';
 import { slugify } from 'node_modules/zod/v4/core/util.cjs';
 import {
-  IBrand,
-  ICategory,
+  IdService,
   IProduct,
   S3KeyService,
   softDeleteQueryFunction,
 } from 'src/common';
 import S3Module from 'src/common/modules/s3.module';
+import { ProductRepository } from '../repositories';
+import { ModuleRef } from '@nestjs/core';
 
 @Schema({
   timestamps: true,
@@ -101,15 +102,6 @@ productSchema.pre('save', function (next) {
   next();
 });
 
-productSchema.pre(['updateOne', 'findOneAndUpdate'], function (next) {
-  const update = this.getUpdate() as UpdateQuery<HydratedProduct>;
-  if (update.name) {
-    this.setUpdate({ ...update, slug: slugify(update.name) });
-  }
-  softDeleteQueryFunction(this);
-  next();
-});
-
 productSchema.pre(['find', 'findOne', 'countDocuments'], function (next) {
   softDeleteQueryFunction(this);
   next();
@@ -119,7 +111,40 @@ export const ProductModel = MongooseModule.forFeatureAsync([
   {
     name: Product.name,
     imports: [S3Module],
-    useFactory: function (s3KeyService: S3KeyService) {
+    useFactory: function (s3KeyService: S3KeyService, moduleRef: ModuleRef) {
+      productSchema.pre(
+        ['updateOne', 'findOneAndUpdate'],
+        async function (next) {
+          const update = this.getUpdate() as UpdateQuery<HydratedProduct>;
+          if (update.name) {
+            update.slug = slugify(update.name);
+          }
+
+          softDeleteQueryFunction(this);
+
+          if (update.originalPrice || update.discountPercent) {
+            const product = await moduleRef
+              .get(ProductRepository, {
+                strict: false,
+              })
+              .findOne({
+                filter: this.getFilter(),
+              });
+            console.log({ product });
+
+            if (product)
+              update.salePrice =
+                (update.originalPrice ?? product.originalPrice) -
+                (update.originalPrice ?? product.originalPrice) *
+                  (((update.discountPercent ?? product.discountPercent) || 0) /
+                    100);
+          }
+          this.setUpdate(update);
+
+          next();
+        },
+      );
+
       productSchema.methods.toJSON = function () {
         const { _id, ...restObj } = this.toObject() as FullProduct;
 
@@ -138,6 +163,7 @@ export const ProductModel = MongooseModule.forFeatureAsync([
         return {
           id: _id,
           name: restObj.name,
+          slug: restObj.slug,
           description: restObj.description,
           image: restObj.images,
           originalPrice: restObj.originalPrice,
@@ -151,7 +177,6 @@ export const ProductModel = MongooseModule.forFeatureAsync([
 
       return productSchema;
     },
-    inject: [S3KeyService],
+    inject: [S3KeyService, ModuleRef],
   },
 ]);
-

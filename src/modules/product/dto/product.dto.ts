@@ -1,5 +1,9 @@
+import { PartialType } from '@nestjs/mapped-types';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsArray,
   IsMongoId,
   IsNotEmpty,
   IsNumber,
@@ -10,7 +14,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { Types } from 'mongoose';
-import { IBrand, ICategory, IProduct } from 'src/common';
+import { ContainField, IProduct } from 'src/common';
 
 export class CreateProductDto implements Partial<IProduct> {
   @MaxLength(2_000)
@@ -45,4 +49,22 @@ export class CreateProductDto implements Partial<IProduct> {
 
   @IsMongoId()
   brand: Types.ObjectId;
+}
+
+export class ProductParamsDto {
+  @IsMongoId()
+  productId: Types.ObjectId;
+}
+
+@ContainField()
+export class UpdateProductDto extends PartialType(CreateProductDto) {}
+
+export class updateProductAttachmentsDto {
+  @ArrayMaxSize(5)
+  @ArrayMinSize(1)
+  @IsNotEmpty({ each: true })
+  @IsString({ each: true })
+  @IsArray()
+  @IsOptional()
+  removeAttachments: string[];
 }
