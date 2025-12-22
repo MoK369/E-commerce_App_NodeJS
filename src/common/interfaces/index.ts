@@ -7,3 +7,5 @@ export type { default as IResponse } from './response.interface';
 export type { default as IBrand } from './brand.interface';
 export type { default as ICategory } from './category.interface';
 export type { default as IProduct } from './product.interface';
+export type * from './cart.interface';
+export { default as ICoupon } from './coupon.interface';

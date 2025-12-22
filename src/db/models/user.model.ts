@@ -5,10 +5,11 @@ import {
   SchemaFactory,
   Virtual,
 } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { Schema as MongooseSchema, HydratedDocument, Types } from 'mongoose';
 import {
   GenderEnum,
   HashingUtil,
+  IProduct,
   IUser,
   LanguagesEnum,
   ProvidersEnum,
@@ -111,6 +112,9 @@ export class User implements IUser {
 
   @Virtual()
   otps: HydratedOtp[];
+
+  @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'Product', max: 500 })
+  wishlist?: Types.ObjectId[] | IProduct[];
 }
 
 export type HydratedUser = HydratedDocument<User>;

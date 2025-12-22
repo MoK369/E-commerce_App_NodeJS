@@ -14,7 +14,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { Types } from 'mongoose';
-import { ContainField, IProduct } from 'src/common';
+import { AreMongoIds, ContainField, IProduct } from 'src/common';
 
 export class CreateProductDto implements Partial<IProduct> {
   @MaxLength(2_000)
@@ -54,6 +54,15 @@ export class CreateProductDto implements Partial<IProduct> {
 export class ProductParamsDto {
   @IsMongoId()
   productId: Types.ObjectId;
+}
+
+export class RemoveFromWishlistDto {
+  @AreMongoIds()
+  @ArrayMaxSize(500)
+  @ArrayMinSize(1)
+  @IsString({ each: true })
+  @IsArray()
+  productIds: Types.ObjectId[];
 }
 
 @ContainField()

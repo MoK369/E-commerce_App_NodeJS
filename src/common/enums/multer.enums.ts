@@ -7,4 +7,5 @@ export enum UploadFoldersEnum {
   brands = 'brands',
   categories = 'categories',
   products = 'products',
+  coupons = 'coupons',
 }
