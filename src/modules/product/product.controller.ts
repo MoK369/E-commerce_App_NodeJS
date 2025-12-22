@@ -1,10 +1,13 @@
 import {
   Body,
   Controller,
+  Delete,
+  Get,
   Param,
   ParseFilePipe,
   Patch,
   Post,
+  Query,
   UploadedFiles,
   UseInterceptors,
   UsePipes,
@@ -15,6 +18,9 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import {
   cloudFileUploadOptions,
   FilesMimeTypes,
+  GetAllAndSearchDto,
+  GetAllAndSearchResponse,
+  IProduct,
   IResponse,
   StorageTypesEnum,
   successResponseHandler,
@@ -122,6 +128,104 @@ class ProductController {
     });
 
     return successResponseHandler<ProductResponse>({ data: { product } });
+  }
+
+  @CombinedAuth({
+    accessRoles: productAuthorizationEndpoints.createAndUpdateProduct,
+  })
+  @Patch(':productId/restore')
+  async restoreProduct(
+    @Param() params: ProductParamsDto,
+    @User() user: HydratedUser,
+  ): Promise<IResponse<ProductResponse>> {
+    const product = await this._productService.restoreProduct({
+      productId: params.productId,
+      user,
+    });
+
+    return successResponseHandler<ProductResponse>({
+      message: 'Product restored successfully ✅',
+      data: { product },
+    });
+  }
+
+  @CombinedAuth({
+    accessRoles: productAuthorizationEndpoints.createAndUpdateProduct,
+  })
+  @Delete(':productId/freeze')
+  async freezeProduct(
+    @Param() params: ProductParamsDto,
+    @User() user: HydratedUser,
+  ): Promise<IResponse> {
+    await this._productService.freezeProduct({ productId: params.productId, user });
+
+    return successResponseHandler({ message: 'Product freezed successfully ✅' });
+  }
+
+  @CombinedAuth({
+    accessRoles: productAuthorizationEndpoints.createAndUpdateProduct,
+  })
+  @Delete(':productId')
+  async removeProduct(@Param() params: ProductParamsDto): Promise<IResponse> {
+    await this._productService.removeProduct({ productId: params.productId });
+
+    return successResponseHandler({ message: 'Product removed successfully ✅' });
+  }
+
+  @Get()
+  async findAllProducts(
+    @Query() queryParams: GetAllAndSearchDto,
+  ): Promise<IResponse<GetAllAndSearchResponse<IProduct>>> {
+    const result = await this._productService.findAllProducts({ queryParams });
+    return successResponseHandler<GetAllAndSearchResponse<IProduct>>({
+      data: result,
+    });
+  }
+
+  @CombinedAuth({
+    accessRoles: productAuthorizationEndpoints.createAndUpdateProduct,
+  })
+  @Get('/archives')
+  async findAllArchives(
+    @Query() queryParams: GetAllAndSearchDto,
+  ): Promise<IResponse<GetAllAndSearchResponse<IProduct>>> {
+    const result = await this._productService.findAllProducts({
+      queryParams,
+      archived: true,
+    });
+    return successResponseHandler<GetAllAndSearchResponse<IProduct>>({
+      data: result,
+    });
+  }
+
+  @CombinedAuth({
+    accessRoles: productAuthorizationEndpoints.createAndUpdateProduct,
+  })
+  @Get(':productId/archived')
+  async findArchivedProduct(
+    @Param() params: ProductParamsDto,
+  ): Promise<IResponse<ProductResponse>> {
+    return successResponseHandler<ProductResponse>({
+      data: {
+        product: await this._productService.findOneProduct({
+          productId: params.productId,
+          archived: true,
+        }),
+      },
+    });
+  }
+
+  @Get(':productId')
+  async findProduct(
+    @Param() params: ProductParamsDto,
+  ): Promise<IResponse<ProductResponse>> {
+    return successResponseHandler<ProductResponse>({
+      data: {
+        product: await this._productService.findOneProduct({
+          productId: params.productId,
+        }),
+      },
+    });
   }
 }
 

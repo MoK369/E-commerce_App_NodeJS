@@ -17,6 +17,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import {
   cloudFileUploadOptions,
   FilesMimeTypes,
+  GetAllAndSearchDto,
+  GetAllAndSearchResponse,
+  ICategory,
   IResponse,
   successResponseHandler,
   User,
@@ -28,12 +31,10 @@ import { type HydratedUser } from 'src/db';
 import {
   CategoryParamsDto,
   CreateCategoryDto,
-  GetAllCategoriesDto,
   UpdateCategoryDto,
 } from './dto/category.dto';
 import {
   CategoryResponse,
-  FindAllCategoriesResponse,
   UpdateCategoryImageResponse,
 } from './entities/category.entities';
 
@@ -164,12 +165,12 @@ class CategoryController {
 
   @Get()
   async findAllCategories(
-    @Query() queryParams: GetAllCategoriesDto,
-  ): Promise<IResponse<FindAllCategoriesResponse>> {
+    @Query() queryParams: GetAllAndSearchDto,
+  ): Promise<IResponse<GetAllAndSearchResponse<ICategory>>> {
     const result = await this._categoryService.findAllCategories({
       queryParams,
     });
-    return successResponseHandler<FindAllCategoriesResponse>({ data: result });
+    return successResponseHandler<GetAllAndSearchResponse<ICategory>>({ data: result });
   }
 
   @CombinedAuth({
@@ -177,13 +178,13 @@ class CategoryController {
   })
   @Get('/archives')
   async findAllArchives(
-    @Query() queryParams: GetAllCategoriesDto,
-  ): Promise<IResponse<FindAllCategoriesResponse>> {
+    @Query() queryParams: GetAllAndSearchDto,
+  ): Promise<IResponse<GetAllAndSearchResponse<ICategory>>> {
     const result = await this._categoryService.findAllCategories({
       queryParams,
       archived: true,
     });
-    return successResponseHandler<FindAllCategoriesResponse>({ data: result });
+    return successResponseHandler<GetAllAndSearchResponse<ICategory>>({ data: result });
   }
 
   @CombinedAuth({

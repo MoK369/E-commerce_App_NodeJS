@@ -11,11 +11,3 @@ export class CategoryResponse {
 export class UpdateCategoryImageResponse {
   image: string;
 }
-
-export class FindAllCategoriesResponse implements IPaginationResult<ICategory> {
-  totalCount?: number | undefined;
-  totalPages?: number | undefined;
-  currentPage?: number | undefined;
-  size?: number | undefined;
-  data?: FindFunctionsReturnType<ICategory, false>[];
-}

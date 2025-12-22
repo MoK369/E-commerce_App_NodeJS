@@ -6,7 +6,9 @@ import {
   PayloadTooLargeException,
 } from '@nestjs/common';
 import {
+  GetAllAndSearchDto,
   IdService,
+  IPaginationResult,
   IProduct,
   S3KeyService,
   S3Service,
@@ -14,12 +16,11 @@ import {
   UploadFoldersEnum,
 } from 'src/common';
 import {
-  BrandRepository,
+  ProductRepository,
   CategoryRepository,
   HydratedCategory,
   HydratedProduct,
   type HydratedUser,
-  ProductRepository,
 } from 'src/db';
 import {
   CreateProductDto,
@@ -33,7 +34,6 @@ class ProductService {
   constructor(
     private readonly _productRepository: ProductRepository,
     private readonly _categoryRepository: CategoryRepository,
-    private readonly _brandRepository: BrandRepository,
     private readonly _s3Service: S3Service,
     private readonly _s3KeyService: S3KeyService,
     private readonly _idService: IdService,
@@ -56,7 +56,7 @@ class ProductService {
     }
 
     if (
-      !(await this._brandRepository.findOne({
+      !(await this._productRepository.findOne({
         filter: { _id: body.brand },
       }))
     ) {
@@ -120,7 +120,7 @@ class ProductService {
     }
     if (
       body.brand &&
-      !(await this._brandRepository.findOne({
+      !(await this._productRepository.findOne({
         filter: { _id: body.brand },
       }))
     ) {
@@ -159,8 +159,6 @@ class ProductService {
 
     const attachments = [...product.images];
 
-    console.log('before: ', { attachments });
-
     if (body?.removeAttachments?.length) {
       for (let i = 0; i < attachments.length; i++) {
         console.log('length: ', attachments.length);
@@ -173,8 +171,6 @@ class ProductService {
         }
       }
     }
-
-    console.log('after: ', { attachments });
 
     if (attachments.length + (files?.length ?? 0) > 5) {
       throw new PayloadTooLargeException(
@@ -205,6 +201,118 @@ class ProductService {
         subKey,
       }),
     );
+  }
+
+  async freezeProduct({
+    productId,
+    user,
+  }: {
+    productId: Types.ObjectId;
+    user: HydratedUser;
+  }): Promise<void> {
+    const product = await this._productRepository.findOneAndUpdate({
+      filter: { _id: productId },
+      update: {
+        freezedAt: new Date(),
+        $unset: { restoredAt: 1 },
+        updatedBy: user._id,
+      },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Invalid productId or already freezed ❌');
+    }
+  }
+
+  async restoreProduct({
+    productId,
+    user,
+  }: {
+    productId: Types.ObjectId;
+    user: HydratedUser;
+  }): Promise<HydratedProduct> {
+    const product = await this._productRepository.findOneAndUpdate({
+      filter: { _id: productId, paranoid: false, freezedAt: { $exists: true } },
+      update: {
+        restoredAt: new Date(),
+        $unset: { freezedAt: 1 },
+        updatedBy: user._id,
+      },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Invalid productId or already restored ❌');
+    }
+
+    return product;
+  }
+
+  async removeProduct({ productId }: { productId: Types.ObjectId }): Promise<void> {
+    const product = await this._productRepository.findOneAndDelete({
+      filter: { _id: productId, paranoid: false, freezedAt: { $exists: true } },
+    });
+
+    if (!product) {
+      throw new NotFoundException(
+        'Invalid productId, product not freezed, or product already removed ❌',
+      );
+    }
+
+    await this._s3Service.deleteFiles({ SubKeys: product.images });
+  }
+
+  async findAllProducts({
+    queryParams,
+    archived = false,
+  }: {
+    queryParams: GetAllAndSearchDto;
+    archived?: boolean;
+  }): Promise<IPaginationResult<HydratedProduct>> {
+    const result = await this._productRepository.paginate({
+      filter: {
+        ...(queryParams.searchKey
+          ? {
+              $or: [
+                { name: { $regex: queryParams.searchKey, $options: 'i' } },
+                { slug: { $regex: queryParams.searchKey, $options: 'i' } },
+                { description: { $regex: queryParams.searchKey, $options: 'i' } },
+              ],
+            }
+          : {}),
+
+        ...(archived ? { paranoid: false, freezedAt: { $exists: true } } : {}),
+      },
+      page: queryParams.page || 1,
+      size: queryParams.size || 10,
+    });
+    if (!result.data || result.data.length == 0) {
+      throw new NotFoundException(
+        archived ? 'No archived products found 🔍❌' : 'No products found 🔍❌',
+      );
+    }
+
+    return result;
+  }
+
+  async findOneProduct({
+    productId,
+    archived,
+  }: {
+    productId: Types.ObjectId;
+    archived?: boolean;
+  }): Promise<HydratedProduct> {
+    const product = await this._productRepository.findOne({
+      filter: {
+        _id: productId,
+        ...(archived ? { paranoid: false, freezedAt: { $exists: true } } : {}),
+      },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Product NOT Found ❌');
+    }
+
+    return product;
   }
 }
 

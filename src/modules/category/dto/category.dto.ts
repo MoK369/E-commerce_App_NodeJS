@@ -56,24 +56,3 @@ export class UpdateCategoryDto extends PartialType(CreateCategoryDto) {
   @IsOptional()
   removeBrands?: Types.ObjectId[];
 }
-
-export class GetAllCategoriesDto {
-  @Type(() => Number)
-  @IsInt()
-  @IsPositive()
-  @IsNumber()
-  @IsOptional()
-  page: number;
-
-  @Type(() => Number)
-  @IsInt()
-  @IsPositive()
-  @IsNumber()
-  @IsOptional()
-  size: number;
-
-  @IsNotEmpty()
-  @IsString()
-  @IsOptional()
-  searchKey: string;
-}

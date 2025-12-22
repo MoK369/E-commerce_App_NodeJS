@@ -17,6 +17,9 @@ import BrandService from './brand.service';
 import {
   cloudFileUploadOptions,
   FilesMimeTypes,
+  GetAllAndSearchDto,
+  GetAllAndSearchResponse,
+  IBrand,
   IResponse,
   successResponseHandler,
   User,
@@ -24,14 +27,12 @@ import {
 import {
   BrandParamsDto,
   CreateBrandDto,
-  GetAllBrandsDto,
   UpdateBrandDto,
 } from './dto/brand.dto';
 import type { HydratedUser } from 'src/db';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   BrandResponse,
-  FindAllBrandsResponse,
   UpdateBrandImageResponse,
 } from './entities/brand.entity';
 import { CombinedAuth } from 'src/common/decorators/auths.decorator';
@@ -143,22 +144,22 @@ class BrandController {
 
   @Get()
   async findAllBrands(
-    @Query() queryParams: GetAllBrandsDto,
-  ): Promise<IResponse<FindAllBrandsResponse>> {
+    @Query() queryParams: GetAllAndSearchDto,
+  ): Promise<IResponse<GetAllAndSearchResponse<IBrand>>> {
     const result = await this._brandService.findAllBrands({ queryParams });
-    return successResponseHandler<FindAllBrandsResponse>({ data: result });
+    return successResponseHandler<GetAllAndSearchResponse<IBrand>>({ data: result });
   }
 
   @CombinedAuth({ accessRoles: brandAuthorizationEndpoints.createAndUpdateBrand })
   @Get('/archives')
   async findAllArchives(
-    @Query() queryParams: GetAllBrandsDto,
-  ): Promise<IResponse<FindAllBrandsResponse>> {
+    @Query() queryParams: GetAllAndSearchDto,
+  ): Promise<IResponse<GetAllAndSearchResponse<IBrand>>> {
     const result = await this._brandService.findAllBrands({
       queryParams,
       archived: true,
     });
-    return successResponseHandler<FindAllBrandsResponse>({ data: result });
+    return successResponseHandler<GetAllAndSearchResponse<IBrand>>({ data: result });
   }
 
   @CombinedAuth({ accessRoles: brandAuthorizationEndpoints.createAndUpdateBrand })

@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
+  GetAllAndSearchDto,
   ICategory,
   IdService,
   IPaginationResult,
@@ -20,7 +21,6 @@ import {
 } from 'src/db';
 import {
   CreateCategoryDto,
-  GetAllCategoriesDto,
   UpdateCategoryDto,
 } from './dto/category.dto';
 import { Types } from 'mongoose';
@@ -273,7 +273,7 @@ class CategoryService {
     queryParams,
     archived = false,
   }: {
-    queryParams: GetAllCategoriesDto;
+    queryParams: GetAllAndSearchDto;
     archived?: boolean;
   }): Promise<IPaginationResult<HydratedCategory>> {
     const result = await this._categoryRespository.paginate({

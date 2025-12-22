@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   InternalServerErrorException,
@@ -8,10 +7,10 @@ import {
 import { BrandRepository, HydratedBrand, HydratedUser } from 'src/db';
 import {
   CreateBrandDto,
-  GetAllBrandsDto,
   UpdateBrandDto,
 } from './dto/brand.dto';
 import {
+  GetAllAndSearchDto,
   IBrand,
   IPaginationResult,
   S3KeyService,
@@ -195,7 +194,7 @@ class BrandService {
     queryParams,
     archived = false,
   }: {
-    queryParams: GetAllBrandsDto;
+    queryParams: GetAllAndSearchDto;
     archived?: boolean;
   }): Promise<IPaginationResult<HydratedBrand>> {
     const result = await this._brandRepository.paginate({
