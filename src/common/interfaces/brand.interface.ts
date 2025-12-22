@@ -12,6 +12,9 @@ class IBrand {
   createdBy: Types.ObjectId | IUser;
   updatedBy?: Types.ObjectId | IUser;
 
+  freezedAt?: Date;
+  restoredAt?:  Date;
+
   createdAt?: Date;
   updatedAt?: Date;
 }

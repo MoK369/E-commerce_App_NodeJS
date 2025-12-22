@@ -4,7 +4,7 @@ import {
   NestMiddleware,
 } from '@nestjs/common';
 import type { NextFunction, Response } from 'express';
-import TokenService from '../utils/security/token.security';
+import TokenService from '../services/security/token.security';
 import type { IAuthRequest } from '../interfaces';
 import { TokenTypesEnum } from '../enums';
 //   {

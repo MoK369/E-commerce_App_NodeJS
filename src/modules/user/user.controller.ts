@@ -75,37 +75,37 @@ class UserController {
     return { message: 'Done ✅', profileImage };
   }
 
-  @UseInterceptors(
-    FilesInterceptor(
-      'coverImages',
-      2,
-      localFileUploadOptions({
-        folder: 'user',
-        fileValidation: FilesMimeTypes.images,
-      }),
-    ),
-  )
-  @ApplyAuthentication()
-  @Patch('cover-images')
-  coverImages(
-    @UploadedFiles(
-      new ParseFilePipe({
-        fileIsRequired: true,
-        exceptionFactory(error) {
-          throw new NotFoundException('Files are required');
-        },
-        validators: [
-          new MaxFileSizeValidator({
-            maxSize: 2 * 1024 * 1024,
-            message: (maxSize) => `file is to large maxSize is ${maxSize} `,
-          }),
-        ],
-      }),
-    )
-    files: IMulterFile[],
-  ) {
-    return { message: 'Done ✅', files };
-  }
+  // @UseInterceptors(
+  //   FilesInterceptor(
+  //     'coverImages',
+  //     2,
+  //     localFileUploadOptions({
+  //       folder: 'user',
+  //       fileValidation: FilesMimeTypes.images,
+  //     }),
+  //   ),
+  // )
+  // @ApplyAuthentication()
+  // @Patch('cover-images')
+  // coverImages(
+  //   @UploadedFiles(
+  //     new ParseFilePipe({
+  //       fileIsRequired: true,
+  //       exceptionFactory(error) {
+  //         throw new NotFoundException('Files are required');
+  //       },
+  //       validators: [
+  //         new MaxFileSizeValidator({
+  //           maxSize: 2 * 1024 * 1024,
+  //           message: (maxSize) => `file is to large maxSize is ${maxSize} `,
+  //         }),
+  //       ],
+  //     }),
+  //   )
+  //   files: IMulterFile[],
+  // ) {
+  //   return { message: 'Done ✅', files };
+  // }
 }
 
 export default UserController;

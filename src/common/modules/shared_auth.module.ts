@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import {
   UserRepository,
   UserModel,
@@ -7,7 +7,7 @@ import {
 } from 'src/db';
 import { IdService } from 'src/common';
 import { JwtService } from '@nestjs/jwt';
-import TokenService from 'src/common/utils/security/token.security';
+import TokenService from 'src/common/services/security/token.security';
 
 @Module({
   imports: [UserModel, RevokedTokenModel],
