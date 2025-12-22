@@ -5,3 +5,8 @@ export * from './types';
 export * from './interfaces';
 export * from './utils';
 export * from './constants';
+export * from './middlewares';
+export * from './error';
+export * from './services';
+export * from "./dtos"
+export * from "./entities"

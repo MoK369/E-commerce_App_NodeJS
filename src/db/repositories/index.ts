@@ -1,2 +1,9 @@
 export { default as DatabaseRepository } from './database.repository';
 export { default as UserRepository } from './user.repository';
+export { default as OtpRepository } from './otp.repository';
+export { default as RevokedTokenRepository } from './revoked_token.repository';
+export { default as BrandRepository } from './brand.repository';
+export { default as CategoryRepository } from './category.repository';
+export { default as ProductRepository } from './product.repository';
+export { default as CartRepository } from './cart.repository';
+export { default as CouponRepository } from './coupon.repository';

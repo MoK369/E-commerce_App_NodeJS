@@ -19,7 +19,7 @@ import {
 } from 'src/common';
 import OtpRepository from 'src/db/repositories/otp.repository';
 import { Types } from 'mongoose';
-import TokenService from 'src/common/utils/security/token.security';
+import TokenService from 'src/common/services/security/token.security';
 
 @Injectable()
 export class AuthenticationService {
@@ -45,7 +45,7 @@ export class AuthenticationService {
     });
   }
 
-  async signUp(data: SignUpBodyDto): Promise<string> {
+  async signUp(data: SignUpBodyDto): Promise<void> {
     const { username, email, password } = data;
 
     const emailExists = await this._userRepository.findOne({
@@ -65,11 +65,9 @@ export class AuthenticationService {
     }
 
     this._createNewOtp(user._id);
-
-    return 'Signed up Successfully ✅';
   }
 
-  async resendConfirmEmail(data: ResendConfirmEmailBodyDto): Promise<string> {
+  async resendConfirmEmail(data: ResendConfirmEmailBodyDto): Promise<void> {
     const { email } = data;
 
     const user = await this._userRepository.findOne({
@@ -92,11 +90,9 @@ export class AuthenticationService {
     }
 
     await this._createNewOtp(user._id);
-
-    return 'OTP has been resend ✅';
   }
 
-  async confirmEmail(data: ConfirmEmailBodyDto): Promise<string> {
+  async confirmEmail(data: ConfirmEmailBodyDto): Promise<void> {
     const { email, otp } = data;
 
     const user = await this._userRepository.findOne({
@@ -111,8 +107,6 @@ export class AuthenticationService {
     if (!user) {
       throw new NotFoundException('Invalid email or already verified ❌');
     }
-
-    console.log(user.otps);
 
     if (
       !(
@@ -130,8 +124,6 @@ export class AuthenticationService {
       user.updateOne({ confirmedAt: new Date() }),
       this._otpRepository.deleteOne({ filter: { _id: user.otps[0]._id } }),
     ]);
-
-    return 'Email has been confirmed ✅';
   }
 
   async logIn(
