@@ -1,9 +1,11 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
   PayloadTooLargeException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import {
   GetAllAndSearchDto,
@@ -21,6 +23,7 @@ import {
   HydratedCategory,
   HydratedProduct,
   type HydratedUser,
+  UserRepository,
 } from 'src/db';
 import {
   CreateProductDto,
@@ -34,6 +37,7 @@ class ProductService {
   constructor(
     private readonly _productRepository: ProductRepository,
     private readonly _categoryRepository: CategoryRepository,
+    private readonly _userRepository: UserRepository,
     private readonly _s3Service: S3Service,
     private readonly _s3KeyService: S3KeyService,
     private readonly _idService: IdService,
@@ -247,7 +251,11 @@ class ProductService {
     return product;
   }
 
-  async removeProduct({ productId }: { productId: Types.ObjectId }): Promise<void> {
+  async removeProduct({
+    productId,
+  }: {
+    productId: Types.ObjectId;
+  }): Promise<void> {
     const product = await this._productRepository.findOneAndDelete({
       filter: { _id: productId, paranoid: false, freezedAt: { $exists: true } },
     });
@@ -275,7 +283,9 @@ class ProductService {
               $or: [
                 { name: { $regex: queryParams.searchKey, $options: 'i' } },
                 { slug: { $regex: queryParams.searchKey, $options: 'i' } },
-                { description: { $regex: queryParams.searchKey, $options: 'i' } },
+                {
+                  description: { $regex: queryParams.searchKey, $options: 'i' },
+                },
               ],
             }
           : {}),
@@ -313,6 +323,58 @@ class ProductService {
     }
 
     return product;
+  }
+
+  async addToWishlist({
+    productId,
+    user,
+  }: {
+    productId: Types.ObjectId;
+    user: HydratedUser;
+  }): Promise<void> {
+    const product = await this._productRepository.findOne({
+      filter: {
+        _id: productId,
+      },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Product NOT Found ❌');
+    }
+
+    if (user?.wishlist?.length) {
+      if (user.wishlist.length >= 500)
+        throw new BadRequestException(
+          'Wishlist reach it full length (500 items) ❌',
+        );
+
+      if ((user.wishlist as Types.ObjectId[]).includes(product._id))
+        throw new ConflictException('Product already add to wishlist ⛔');
+    }
+
+    await this._userRepository.updateOne({
+      filter: { _id: user._id },
+      update: { $addToSet: { wishlist: product._id } },
+    });
+  }
+
+  async removeFromWishlist({
+    productIds,
+    user,
+  }: {
+    productIds: Types.ObjectId[];
+    user: HydratedUser;
+  }): Promise<void> {
+    await this._userRepository.updateOne({
+      filter: { _id: user._id },
+      update: {
+        $pullAll: {
+          wishlist: productIds.map((pro) =>
+            Types.ObjectId.createFromHexString(pro as unknown as string),
+          ),
+        },
+      },
+    });
   }
 }
 

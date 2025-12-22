@@ -26,12 +26,16 @@ import {
   successResponseHandler,
   User,
 } from 'src/common';
-import { CombinedAuth } from 'src/common/decorators/auths.decorator';
+import {
+  ApplyAuthentication,
+  CombinedAuth,
+} from 'src/common/decorators/auths.decorator';
 import productAuthorizationEndpoints from './product.authorization';
 import { type HydratedUser } from 'src/db';
 import {
   CreateProductDto,
   ProductParamsDto,
+  RemoveFromWishlistDto,
   updateProductAttachmentsDto,
   UpdateProductDto,
 } from './dto/product.dto';
@@ -115,6 +119,57 @@ class ProductController {
   @CombinedAuth({
     accessRoles: productAuthorizationEndpoints.createAndUpdateProduct,
   })
+  @Patch(':productId/restore')
+  async restoreProduct(
+    @Param() params: ProductParamsDto,
+    @User() user: HydratedUser,
+  ): Promise<IResponse<ProductResponse>> {
+    const product = await this._productService.restoreProduct({
+      productId: params.productId,
+      user,
+    });
+
+    return successResponseHandler<ProductResponse>({
+      message: 'Product restored successfully ✅',
+      data: { product },
+    });
+  }
+
+  @ApplyAuthentication()
+  @Patch(':productId/add-to-wishlist')
+  async addToWishlist(
+    @Param() params: ProductParamsDto,
+    @User() user: HydratedUser,
+  ): Promise<IResponse> {
+    await this._productService.addToWishlist({
+      productId: params.productId,
+      user,
+    });
+
+    return successResponseHandler({
+      message: 'Product Added to wishlist 🗑️✅',
+    });
+  }
+
+  @ApplyAuthentication()
+  @Patch('remove-from-wishlist')
+  async removeFromWishlist(
+    @Body() body: RemoveFromWishlistDto,
+    @User() user: HydratedUser,
+  ): Promise<IResponse> {
+    await this._productService.removeFromWishlist({
+      productIds: body.productIds,
+      user,
+    });
+
+    return successResponseHandler({
+      message: 'Product removed from wishlist 🗑️✅',
+    });
+  }
+
+  @CombinedAuth({
+    accessRoles: productAuthorizationEndpoints.createAndUpdateProduct,
+  })
   @Patch(':productId')
   async updateProduct(
     @Param() params: ProductParamsDto,
@@ -133,33 +188,19 @@ class ProductController {
   @CombinedAuth({
     accessRoles: productAuthorizationEndpoints.createAndUpdateProduct,
   })
-  @Patch(':productId/restore')
-  async restoreProduct(
-    @Param() params: ProductParamsDto,
-    @User() user: HydratedUser,
-  ): Promise<IResponse<ProductResponse>> {
-    const product = await this._productService.restoreProduct({
-      productId: params.productId,
-      user,
-    });
-
-    return successResponseHandler<ProductResponse>({
-      message: 'Product restored successfully ✅',
-      data: { product },
-    });
-  }
-
-  @CombinedAuth({
-    accessRoles: productAuthorizationEndpoints.createAndUpdateProduct,
-  })
   @Delete(':productId/freeze')
   async freezeProduct(
     @Param() params: ProductParamsDto,
     @User() user: HydratedUser,
   ): Promise<IResponse> {
-    await this._productService.freezeProduct({ productId: params.productId, user });
+    await this._productService.freezeProduct({
+      productId: params.productId,
+      user,
+    });
 
-    return successResponseHandler({ message: 'Product freezed successfully ✅' });
+    return successResponseHandler({
+      message: 'Product freezed successfully ✅',
+    });
   }
 
   @CombinedAuth({
@@ -169,7 +210,9 @@ class ProductController {
   async removeProduct(@Param() params: ProductParamsDto): Promise<IResponse> {
     await this._productService.removeProduct({ productId: params.productId });
 
-    return successResponseHandler({ message: 'Product removed successfully ✅' });
+    return successResponseHandler({
+      message: 'Product removed successfully ✅',
+    });
   }
 
   @Get()

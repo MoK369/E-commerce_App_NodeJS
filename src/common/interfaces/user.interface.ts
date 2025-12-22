@@ -6,6 +6,7 @@ import {
   UserRolesEnum,
 } from '../enums';
 import { HydratedOtp } from 'src/db';
+import IProduct from './product.interface';
 
 interface IUser {
   id?: Types.ObjectId;
@@ -35,6 +36,8 @@ interface IUser {
   profileImage?: { url: string; provider: ProvidersEnum };
 
   otps: HydratedOtp[];
+
+  wishlist?: Types.ObjectId[] | IProduct[];
 
   createdAt?: Date;
   updatedAt?: Date;

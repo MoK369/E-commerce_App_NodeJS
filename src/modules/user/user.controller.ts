@@ -38,11 +38,9 @@ class UserController {
   @ApplyAuthentication()
   @Get()
   async profile(
-    @Headers() headers: Request['headers'],
     @User() profile: HydratedUser,
   ): Promise<IResponse<ProfileResponse>> {
-    console.log({ lang: headers['accept-language'] });
-
+    await profile.populate([{ path: 'wishlist' }]);
     return successResponseHandler<ProfileResponse>({ data: { profile } });
   }
 
