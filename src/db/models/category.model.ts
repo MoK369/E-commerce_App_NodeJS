@@ -76,10 +76,8 @@ categorySchema.pre(['updateOne', 'findOneAndUpdate'], function (next) {
   if (Array.isArray(update)) {
     const name: string | undefined = update![0]['$set'].name;
     if (name) {
-      this.setUpdate({
-        ...update,
-        $set: { slug: slugify(name) },
-      });
+      update![0]['$set'].slug = slugify(name);
+      this.setUpdate(update);
     }
   } else if (typeof update == 'object') {
     if ((update as UpdateQuery<HydratedCategory>)?.name) {
@@ -89,6 +87,8 @@ categorySchema.pre(['updateOne', 'findOneAndUpdate'], function (next) {
       });
     }
   }
+  console.log(this.getUpdate());
+
   softDeleteQueryFunction(this);
   next();
 });

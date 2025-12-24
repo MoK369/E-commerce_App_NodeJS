@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 import IUser from './user.interface';
-import { CouponTypesEnum } from '../enums';
+import { CouponTypesEnum } from '../enums/coupon.enum';
 
 class ICoupon {
   id?: Types.ObjectId;

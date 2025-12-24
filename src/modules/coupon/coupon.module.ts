@@ -9,7 +9,10 @@ import CouponService from './coupon.service';
   imports: [SharedAuthenticationModule, S3Module, CouponModel],
   exports: [],
   controllers: [CouponController],
-  providers: [CouponService, CouponRepository],
+  providers: [
+    CouponService,
+    CouponRepository,
+  ],
 })
 class CouponModule {}
 
