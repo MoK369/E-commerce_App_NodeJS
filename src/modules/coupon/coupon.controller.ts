@@ -37,6 +37,7 @@ import {
   CouponResponse,
   UpdateCouponImageResponse,
 } from './entities/coupon.entities';
+import { RequestContextInterceptor } from 'src/common/interceptors';
 
 @UsePipes(
   new ValidationPipe({
@@ -114,6 +115,7 @@ class CouponController {
     });
   }
 
+  @UseInterceptors(new RequestContextInterceptor('couponId'))
   @CombinedAuth({
     accessRoles: couponAuthorizationEndpoints.createAndUpdateCoupon,
   })

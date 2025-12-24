@@ -1,4 +1,3 @@
-import { Injectable, Scope } from '@nestjs/common';
 import {
   registerDecorator,
   ValidationArguments,
@@ -6,24 +5,31 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
+import { CouponRepository } from 'src/db';
 
-@Injectable({ scope: Scope.REQUEST })
-@ValidatorConstraint({ name: 'CheckAfterDate', async: true })
+@ValidatorConstraint({ name: 'IsAfterDate', async: true })
 export class CheckAfterDate implements ValidatorConstraintInterface {
-  constructor(
-  
-  ) {}
+  constructor(private readonly _couponRepository: CouponRepository) {}
 
   async validate(
     value: string,
     validationArguments?: ValidationArguments,
   ): Promise<boolean> {
     const inputDate = new Date(value);
-    const comparingDate = new Date(
-      validationArguments?.object[validationArguments?.constraints[0]] ?? '',
-    );
+    let comparingDate: Date;
 
-    console.log({ object: validationArguments?.object });
+    if (!validationArguments?.object[validationArguments?.constraints[0]]) {
+      const coupon = await this._couponRepository.findById({
+        id: (validationArguments?.object as any).requestContext.id,
+      });
+      if (!coupon) return true;
+
+      comparingDate = new Date(coupon.startDate);
+    } else {
+      comparingDate = new Date(
+        validationArguments.object[validationArguments.constraints[0]],
+      );
+    }
 
     return inputDate.getTime() > comparingDate.getTime();
   }

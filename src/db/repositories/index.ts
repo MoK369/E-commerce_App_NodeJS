@@ -7,3 +7,4 @@ export { default as CategoryRepository } from './category.repository';
 export { default as ProductRepository } from './product.repository';
 export { default as CartRepository } from './cart.repository';
 export { default as CouponRepository } from './coupon.repository';
+export { default as OrderRepository } from './order.repository';

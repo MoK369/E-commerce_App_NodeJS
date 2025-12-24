@@ -18,6 +18,7 @@ import CategoryModule from './modules/category/category.module';
 import ProductModule from './modules/product/product.module';
 import CartModule from './modules/cart/cart.module';
 import CouponModule from './modules/coupon/coupon.module';
+import OrderModule from './modules/order/order.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ export class AppModule implements NestModule {
     ProductModule,
     CartModule,
     CouponModule,
+    OrderModule,
   ];
 
   configure(consumer: MiddlewareConsumer) {

@@ -1,6 +1,7 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { Type } from 'class-transformer';
 import {
+  Allow,
   IsDateString,
   IsEnum,
   IsInt,
@@ -51,4 +52,7 @@ export class CouponParamsDto {
   couponId: Types.ObjectId;
 }
 
-export class UpdateCouponDto extends PartialType(CreateCouponDto) {}
+export class UpdateCouponDto extends PartialType(CreateCouponDto) {
+  @Allow()
+  requestContext: { id: string };
+}

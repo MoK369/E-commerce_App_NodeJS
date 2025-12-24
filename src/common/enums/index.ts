@@ -3,3 +3,4 @@ export * from './email.enums';
 export * from './token.enums';
 export * from './multer.enums';
 export * from './coupon.enum';
+export * from './order.enums';

@@ -39,6 +39,7 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "slugify": "^1.6.6",
+    "stripe": "^20.1.0",
     "zod": "^4.1.13"
   },
   "devDependencies": {
