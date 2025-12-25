@@ -13,7 +13,7 @@ import {
 } from 'src/db';
 import OrderService from './order.service';
 import OrderController from './order.controller';
-import { StripePaymentService } from 'src/common';
+import { PaymentService } from 'src/common';
 
 @Module({
   imports: [
@@ -32,7 +32,7 @@ import { StripePaymentService } from 'src/common';
     CouponRepository,
     CartRepository,
     ProductRepository,
-    StripePaymentService,
+    PaymentService,
   ],
 })
 class OrderModule {}

@@ -130,7 +130,6 @@ export const ProductModel = MongooseModule.forFeatureAsync([
               .findOne({
                 filter: this.getFilter(),
               });
-            console.log({ product });
 
             if (product)
               update.salePrice =

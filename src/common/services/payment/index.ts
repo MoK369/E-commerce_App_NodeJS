@@ -1,1 +1,1 @@
-export { default as StripePaymentService } from './stripe_payment.service';
+export { default as PaymentService } from './stripe_payment.service';

@@ -88,6 +88,7 @@ export class Order implements IOrder {
   })
   payment: PaymentTypesEnum;
 
+
   @Prop({ type: String })
   paymentIntent?: string;
 

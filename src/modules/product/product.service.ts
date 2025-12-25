@@ -165,10 +165,8 @@ class ProductService {
 
     if (body?.removeAttachments?.length) {
       for (let i = 0; i < attachments.length; i++) {
-        console.log('length: ', attachments.length);
 
         if (body.removeAttachments.includes(attachments[i])) {
-          console.log(i, attachments[i]);
 
           attachments.splice(i, 1);
           i--;

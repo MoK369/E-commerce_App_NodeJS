@@ -87,8 +87,6 @@ categorySchema.pre(['updateOne', 'findOneAndUpdate'], function (next) {
       });
     }
   }
-  console.log(this.getUpdate());
-
   softDeleteQueryFunction(this);
   next();
 });

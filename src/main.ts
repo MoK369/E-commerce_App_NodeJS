@@ -10,6 +10,9 @@ async function bootstrap() {
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
+  app.enableCors();
+  app.use('/api/v1/order/webhook', express.raw({ type: 'application/json' }));
+
   app.useGlobalInterceptors(new WatchRequestInterceptor());
   app.use('/uploads', express.static(path.resolve('./uploads')));
   await app.listen(process.env.PORT ?? 5000);

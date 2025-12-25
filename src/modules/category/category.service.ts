@@ -124,7 +124,6 @@ class CategoryService {
     delete body.removeBrands;
     delete body.brands;
 
-    console.log({ body });
 
     const category = await this._categoryRespository.findOneAndUpdate<[]>({
       filter: { _id: categoryId },

@@ -13,8 +13,6 @@ class AuthenticationGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    console.log({ context });
-
     const tokenType =
       this._reflector.getAllAndOverride<TokenTypesEnum>(
         StringConstants.tokenTypeName,
