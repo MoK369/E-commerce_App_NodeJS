@@ -1,12 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { Type } from 'class-transformer';
 import {
-  IsInt,
   IsMongoId,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsPositive,
   IsString,
   MaxLength,
   MinLength,

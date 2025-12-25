@@ -143,7 +143,10 @@ abstract class DatabaseRepository<
       });
       toUpdateObject = update;
     } else {
-      toUpdateObject = { ...update, $inc: { __v: 1 } };
+      toUpdateObject = {
+        ...update,
+        $inc: Object.assign(update['$inc'] ?? {}, { __v: 1 }),
+      };
     }
     return this.model.updateOne(filter, toUpdateObject, options);
   };

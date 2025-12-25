@@ -19,10 +19,7 @@ import {
   HydratedCategory,
   HydratedUser,
 } from 'src/db';
-import {
-  CreateCategoryDto,
-  UpdateCategoryDto,
-} from './dto/category.dto';
+import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
 import { Types } from 'mongoose';
 
 @Injectable()
@@ -52,17 +49,8 @@ class CategoryService {
     );
   }
 
-  async createCategory({
-    body,
-    file,
-    user,
-  }: {
-    body: CreateCategoryDto;
-    file: Express.Multer.File;
-    user: HydratedUser;
-  }): Promise<HydratedCategory> {
-    const { name, description } = body;
-
+  private async _checkForDuplicatedCategoryName(name?: string): Promise<void> {
+    if (!name) return;
     const checkDuplicated = await this._categoryRespository.findOne({
       filter: { name, paranoid: false },
     });
@@ -74,6 +62,20 @@ class CategoryService {
           : 'Duplicated Category Name ❌',
       );
     }
+  }
+
+  async createCategory({
+    body,
+    file,
+    user,
+  }: {
+    body: CreateCategoryDto;
+    file: Express.Multer.File;
+    user: HydratedUser;
+  }): Promise<HydratedCategory> {
+    const { name, description } = body;
+
+    await this._checkForDuplicatedCategoryName(name);
 
     const brands = await this._checkBrandsExistance(body.brands);
 
@@ -113,14 +115,8 @@ class CategoryService {
     body: UpdateCategoryDto;
   }): Promise<HydratedCategory> {
     const { name } = body;
-    if (
-      name &&
-      (await this._categoryRespository.findOne({ filter: { name } }))
-    ) {
-      throw new ConflictException('Duplicated category name 🚫');
-    }
 
-    console.log({ body });
+    await this._checkForDuplicatedCategoryName(name);
 
     const brands = await this._checkBrandsExistance(body.brands);
 
@@ -128,7 +124,6 @@ class CategoryService {
     delete body.removeBrands;
     delete body.brands;
 
-    console.log({ body });
 
     const category = await this._categoryRespository.findOneAndUpdate<[]>({
       filter: { _id: categoryId },
@@ -282,7 +277,9 @@ class CategoryService {
           ? {
               $or: [
                 { name: { $regex: queryParams.searchKey, $options: 'i' } },
-                { description: { $regex: queryParams.searchKey, $options: 'i' } },
+                {
+                  description: { $regex: queryParams.searchKey, $options: 'i' },
+                },
                 {
                   slug: { $regex: queryParams.searchKey, $options: 'i' },
                 },

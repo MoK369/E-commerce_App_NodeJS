@@ -5,10 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { BrandRepository, HydratedBrand, HydratedUser } from 'src/db';
-import {
-  CreateBrandDto,
-  UpdateBrandDto,
-} from './dto/brand.dto';
+import { CreateBrandDto, UpdateBrandDto } from './dto/brand.dto';
 import {
   GetAllAndSearchDto,
   IBrand,
@@ -27,17 +24,8 @@ class BrandService {
     private readonly _s3KeyService: S3KeyService,
   ) {}
 
-  async createBrand({
-    body,
-    file,
-    user,
-  }: {
-    body: CreateBrandDto;
-    file: Express.Multer.File;
-    user: HydratedUser;
-  }): Promise<HydratedBrand> {
-    const { name, slogan } = body;
-
+  private async _checkForDuplicatedBrandName(name?: string): Promise<void> {
+    if (!name) return;
     const checkDuplicated = await this._brandRepository.findOne({
       filter: { name, paranoid: false },
     });
@@ -49,6 +37,20 @@ class BrandService {
           : 'Duplicated Brand Name ❌',
       );
     }
+  }
+
+  async createBrand({
+    body,
+    file,
+    user,
+  }: {
+    body: CreateBrandDto;
+    file: Express.Multer.File;
+    user: HydratedUser;
+  }): Promise<HydratedBrand> {
+    const { name, slogan } = body;
+
+    await this._checkForDuplicatedBrandName(name);
 
     const SubKey = await this._s3Service.uploadFile({
       File: file,
@@ -75,12 +77,7 @@ class BrandService {
     brandId: Types.ObjectId;
     body: UpdateBrandDto;
   }): Promise<HydratedBrand> {
-    if (
-      body.name &&
-      (await this._brandRepository.findOne({ filter: { name: body.name } }))
-    ) {
-      throw new ConflictException('Duplicated brand name 🚫');
-    }
+    await this._checkForDuplicatedBrandName(body.name);
 
     const brand = await this._brandRepository.findOneAndUpdate({
       filter: { _id: brandId },

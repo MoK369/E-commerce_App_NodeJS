@@ -18,7 +18,8 @@ class AppRegex {
   static readonly getFileWithUrlRegex =
     /^(users)\/[0-9a-f]{24}\/.+\.(jpeg|jpg|png|gif)/;
 
-  static readonly quizTitleRegex = /^(?=.{3,200}$)[A-Z][a-z]+(\s[A-Z][a-z]+)*$/;
+  static readonly addressRegex =
+    /^(?=.{10,1000}$)(\d+\s+)?[A-Za-z0-9\s]+,\s*[A-Za-z\s]+,\s*[A-Z]{2}\s*\d{5}$/;
 }
 
 export default AppRegex;

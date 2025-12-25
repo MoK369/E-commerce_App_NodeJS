@@ -1,8 +1,11 @@
+import { PartialType } from '@nestjs/mapped-types';
 import { Type } from 'class-transformer';
 import {
-    IsDateString,
+  Allow,
+  IsDateString,
   IsEnum,
   IsInt,
+  IsMongoId,
   IsNotEmpty,
   IsNumber,
   IsPositive,
@@ -10,7 +13,10 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { CouponTypesEnum, ICoupon, IsAfterDate, IsFutureDate } from 'src/common';
+import { Types } from 'mongoose';
+import { ICoupon, IsFutureDate } from 'src/common';
+import { IsAfterDate } from 'src/common/decorators/after_date.decorator';
+import { CouponTypesEnum } from 'src/common/enums/coupon.enum';
 
 export class CreateCouponDto implements Partial<ICoupon> {
   @MaxLength(50)
@@ -32,12 +38,21 @@ export class CreateCouponDto implements Partial<ICoupon> {
   @IsNumber()
   duration?: number | undefined;
 
-
   @IsFutureDate()
   @IsDateString()
   startDate?: Date | undefined;
 
-  @IsAfterDate("startDate")
+  @IsAfterDate('startDate')
   @IsDateString()
   endDate?: Date | undefined;
+}
+
+export class CouponParamsDto {
+  @IsMongoId()
+  couponId: Types.ObjectId;
+}
+
+export class UpdateCouponDto extends PartialType(CreateCouponDto) {
+  @Allow()
+  requestContext: { id: string };
 }

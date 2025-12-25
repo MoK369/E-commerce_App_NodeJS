@@ -5,4 +5,3 @@ export { default as User } from './user_credentials.decorator';
 export { default as ContainField } from './update.decorator';
 export { default as AreMongoIds } from './are_mongo_Ids.decorator';
 export { default as IsFutureDate } from './future_date.decorator';
-export { default as IsAfterDate } from './after_date.decorator';

@@ -49,7 +49,6 @@ otpSchema.pre(
 
 otpSchema.post('save', function (doc, next) {
   const that = this as HydratedOtp & { wasNew: boolean; plainOtp: string };
-  console.log({ that, wasNew: that.wasNew, plainOtp: that.plainOtp });
   if (that.wasNew && that.plainOtp) {
     emailEvent.publish({
       eventName: that.type,

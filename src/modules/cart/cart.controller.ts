@@ -16,7 +16,6 @@ import { type HydratedUser } from 'src/db';
 import { AddToCartDto, RemoveItemsFromCartDto } from './dto/cart.dto';
 import { CartResponse } from './entities/cart.entities';
 import { type Response } from 'express';
-import { RemoveFieldsWithType } from '@nestjs/mapped-types/dist/types/remove-fields-with-type.type';
 
 @ApplyAuthentication()
 @UsePipes(
