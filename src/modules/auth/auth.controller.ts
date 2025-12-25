@@ -5,18 +5,23 @@ import {
   HttpStatus,
   Patch,
   Post,
+  Res,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthenticationService } from './auth.service';
 import {
   ConfirmEmailBodyDto,
+  ForgetPasswordDto,
   LoginBodyDto,
   ResendConfirmEmailBodyDto,
+  ResetForgetPasswordDto,
   SignUpBodyDto,
+  VerifyForgetPasswordDto,
 } from './dto/auth.dto';
 import { IResponse, successResponseHandler } from 'src/common';
 import { LoginResponse } from './entities/auth.entity';
+import { type Response } from 'express';
 
 @UsePipes(
   new ValidationPipe({
@@ -63,6 +68,36 @@ class AuthenticationController {
     return successResponseHandler<LoginResponse>({
       message: 'Logged In Successfully ✅',
       data,
+    });
+  }
+
+  @Post('forget-password')
+  async forgetPassword(
+    @Body() body: ForgetPasswordDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const status = await this.authenticationService.forgetPassword(body);
+    res.status(status);
+    return successResponseHandler({
+      message: 'Forget Password OTP has been sent to your email ✅',
+    });
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('verify-forget-password')
+  async verifyForgetPassword(@Body() body: VerifyForgetPasswordDto) {
+    await this.authenticationService.verifyForgetPassword(body);
+    return successResponseHandler({
+      message: 'Forget Password OTP has Verified ✅',
+    });
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('reset-forget-password')
+  async resetForgetPassword(@Body() body: ResetForgetPasswordDto) {
+    await this.authenticationService.resetForgetPassword(body);
+    return successResponseHandler({
+      message: 'Password has been resetted ✅',
     });
   }
 }

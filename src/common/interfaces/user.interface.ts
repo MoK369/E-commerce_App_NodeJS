@@ -37,6 +37,9 @@ interface IUser {
 
   otps: HydratedOtp[];
 
+  lastResetPasswordAt: Date;
+  resetPasswordVerificationExpiresAt: Date;
+
   wishlist?: Types.ObjectId[] | IProduct[];
 
   createdAt?: Date;

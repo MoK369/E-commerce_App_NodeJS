@@ -9,7 +9,7 @@ import { Model } from 'mongoose';
 
 @Injectable()
 class RevokedTokenRepository extends DatabaseRepository<TRawDocument> {
-  constructor(@InjectModel(TRawDocument.name) model: Model<TDocument>) {
+  constructor(@InjectModel("RevokedToken") model: Model<TDocument>) {
     super(model);
   }
 }

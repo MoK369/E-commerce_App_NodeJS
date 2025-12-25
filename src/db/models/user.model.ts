@@ -113,6 +113,12 @@ export class User implements IUser {
   @Virtual()
   otps: HydratedOtp[];
 
+  @Prop({ type: Date })
+  lastResetPasswordAt: Date;
+
+  @Prop({ type: Date })
+  resetPasswordVerificationExpiresAt: Date;
+
   @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'Product', max: 500 })
   wishlist?: Types.ObjectId[] | IProduct[];
 }

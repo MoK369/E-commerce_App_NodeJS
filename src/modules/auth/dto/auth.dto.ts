@@ -5,6 +5,8 @@ import {
   IsStrongPassword,
   Length,
   Matches,
+  MaxLength,
+  MinLength,
   ValidateIf,
 } from 'class-validator';
 import { AppRegex, IsMatch } from 'src/common';
@@ -35,4 +37,27 @@ export class SignUpBodyDto extends LoginBodyDto {
 export class ConfirmEmailBodyDto extends ResendConfirmEmailBodyDto {
   @Matches(AppRegex.otpRegex)
   otp: string;
+}
+
+export class ForgetPasswordDto {
+  @IsEmail()
+  email: string;
+}
+
+export class VerifyForgetPasswordDto extends ForgetPasswordDto {
+  @Matches(AppRegex.otpRegex, { message: 'OTP must consist of 6 digits 🚫' })
+  @IsString()
+  otpCode: string;
+}
+
+export class ResetForgetPasswordDto extends ForgetPasswordDto {
+  @Matches(AppRegex.passwordRegex, {message:"Password is week"})
+  @IsNotEmpty()
+  @IsString()
+  password: string;
+
+  @IsMatch(['password'])
+  @IsNotEmpty()
+  @IsString()
+  confirmPassword: string;
 }
