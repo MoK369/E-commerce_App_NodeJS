@@ -41,7 +41,7 @@ export class Coupon implements ICoupon {
   updatedBy: Types.ObjectId;
 
   @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'User' })
-  usedBy?: Types.ObjectId[] | IUser[];
+  usedBy: Types.ObjectId[] | IUser[];
 
   @Prop({ type: Date, required: true })
   startDate: Date;

@@ -46,7 +46,6 @@ class S3KeyService {
     req: { host: string; protocol: string };
     subKey: string;
   }): string => {
-    console.log({req});
     
     return `${req.protocol}://${req.host}/uploads/${subKey}`;
   };
