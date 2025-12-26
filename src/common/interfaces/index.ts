@@ -1,7 +1,7 @@
 export * from './repository.interfaces';
 export * from './token.interfaces';
 export * from './multer.interface';
-export type { default as IUser } from './user.interface';
+export type * from './user.interface';
 export type { default as IOtp } from './otp.interface';
 export type { default as IResponse } from './response.interface';
 export type { default as IBrand } from './brand.interface';

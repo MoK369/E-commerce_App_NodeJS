@@ -9,7 +9,7 @@ import { Model } from 'mongoose';
 
 @Injectable()
 class CategoryRepository extends DatabaseRepository<TRawDocument> {
-  constructor(@InjectModel(TRawDocument.name) model: Model<TDocument>) {
+  constructor(@InjectModel("Category") model: Model<TDocument>) {
     super(model);
   }
 }

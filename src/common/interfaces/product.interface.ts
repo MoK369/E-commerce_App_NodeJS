@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import IUser from './user.interface';
+import { IUser } from './user.interface';
 import ICategory from './category.interface';
 import IBrand from './brand.interface';
 

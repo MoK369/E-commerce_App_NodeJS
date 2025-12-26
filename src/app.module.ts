@@ -51,7 +51,7 @@ export class AppModule implements NestModule {
     CouponModule,
     OrderModule,
   ];
-
+  
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(setProtocolAndHostMiddleware)
