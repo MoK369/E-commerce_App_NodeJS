@@ -5,11 +5,13 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import {
   ConfirmEmailBodyDto,
   ForgetPasswordDto,
+  GmailAuthDto,
   LoginBodyDto,
   ResendConfirmEmailBodyDto,
   ResetForgetPasswordDto,
@@ -18,7 +20,6 @@ import {
 } from './dto/auth.dto';
 import { HydratedUser, UserRepository } from 'src/db';
 import {
-  emailEvent,
   EmailEventsEnum,
   HashingUtil,
   IdService,
@@ -28,6 +29,8 @@ import {
 import OtpRepository from 'src/db/repositories/otp.repository';
 import { Types } from 'mongoose';
 import TokenService from 'src/common/services/security/token.security';
+import { OAuth2Client, TokenPayload } from 'google-auth-library';
+import { IProfileImage } from 'src/common/interfaces/user.interface';
 
 @Injectable()
 export class AuthenticationService {
@@ -173,6 +176,135 @@ export class AuthenticationService {
       user,
     };
   }
+
+  private _verifyGmailAccount = async ({
+    idToken,
+  }: {
+    idToken: string;
+  }): Promise<TokenPayload> => {
+    try {
+      const client = new OAuth2Client({});
+      const ticket = await client.verifyIdToken({
+        idToken,
+        audience: process.env.WEB_CLIENT_IDS?.split(',') || [], // Specify the WEB_CLIENT_ID of the app that accesses the backend
+        // Or, if multiple clients access the backend:
+        //[WEB_CLIENT_ID_1, WEB_CLIENT_ID_2, WEB_CLIENT_ID_3]
+      });
+      const payload = ticket.getPayload();
+      // This ID is unique to each Google Account, making it suitable for use as a primary key
+      // during account lookup. Email is not a good choice because it can be changed by the user.
+
+      if (!payload?.email_verified) {
+        throw new BadRequestException(
+          'Failed to verify this gmail account 🇬✉️',
+        );
+      }
+      return payload;
+    } catch (error) {
+      throw new BadRequestException(
+        `Failed Verifying idToken, Error: ${error.message} `,
+      );
+    }
+  };
+
+  async signUpWithGmail(body: GmailAuthDto): Promise<{
+    statusCode: number;
+    accessToken: string;
+    refreshToken: string;
+    user: HydratedUser;
+  }> {
+    const { idToken } = body;
+
+    const { email, given_name, family_name, picture } =
+      await this._verifyGmailAccount({ idToken });
+
+    if (!email || !given_name || given_name.length < 2) {
+      throw new BadRequestException('Invaild gmail account credentials 🇬🪪');
+    }
+
+    const userExist = await this._userRepository.findOne({
+      filter: { email },
+    });
+
+    if (userExist) {
+      if (userExist.provider === ProvidersEnum.google) {
+        return await this.logInWithGmail(body);
+      }
+      throw new ConflictException('Email exists with another provider ✉️❌');
+    }
+
+    const objectToCreate: {
+      profileImage?: IProfileImage;
+    } = {};
+    if (picture && picture.length != 0) {
+      objectToCreate.profileImage = {
+        url: picture,
+        provider: ProvidersEnum.google,
+      };
+    }
+
+    const [user] = await this._userRepository.create({
+      data: [
+        {
+          firstName: given_name,
+          lastName:
+            family_name || `${this._idService.generateNumericId({ size: 3 })}`,
+          email,
+          confirmedAt: new Date(),
+          provider: ProvidersEnum.google,
+          ...objectToCreate,
+        },
+      ],
+    });
+
+    if (!user) {
+      throw new InternalServerErrorException('Failed to create user account');
+    }
+
+    const { accessToken, refreshToken } =
+      await this._tokenService.getTokensBasedOnRole({
+        user: user!,
+      });
+
+    return { statusCode: 201, accessToken, refreshToken, user };
+  }
+
+  logInWithGmail = async (
+    body: GmailAuthDto,
+  ): Promise<{
+    statusCode: number;
+    accessToken: string;
+    refreshToken: string;
+    user: HydratedUser;
+  }> => {
+    const { idToken } = body;
+
+    const { email } = await this._verifyGmailAccount({ idToken });
+
+    if (!email) {
+      throw new BadRequestException('Invaild gmail account credentials 🇬🪪');
+    }
+
+    const user = await this._userRepository.findOne({
+      filter: {
+        email,
+        authProvider: ProvidersEnum.google,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException(
+        'Invalid user account ⚠️ or Email exists with another provider ✉️❌',
+      );
+    }
+
+    const { accessToken, refreshToken } =
+      await this._tokenService.getTokensBasedOnRole({
+        user,
+      });
+
+    return { statusCode: 200, accessToken, refreshToken, user };
+  };
 
   async forgetPassword(body: ForgetPasswordDto): Promise<number> {
     const user = await this._userRepository.findOne({

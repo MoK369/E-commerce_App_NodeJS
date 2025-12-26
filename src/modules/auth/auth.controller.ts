@@ -13,6 +13,7 @@ import { AuthenticationService } from './auth.service';
 import {
   ConfirmEmailBodyDto,
   ForgetPasswordDto,
+  GmailAuthDto,
   LoginBodyDto,
   ResendConfirmEmailBodyDto,
   ResetForgetPasswordDto,
@@ -68,6 +69,33 @@ class AuthenticationController {
     return successResponseHandler<LoginResponse>({
       message: 'Logged In Successfully ✅',
       data,
+    });
+  }
+
+  @Post('sign-up-with-gmail')
+  async signUpWithGmail(
+    @Body()
+    body: GmailAuthDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<IResponse<LoginResponse>> {
+    const { statusCode, ...restObj } =
+      await this.authenticationService.signUpWithGmail(body);
+    res.status(statusCode);
+    return successResponseHandler<LoginResponse>({
+      message: 'Signed up Successfully ✅',
+      data: restObj,
+    });
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('log-in-with-gmail')
+  async logInWithGmail(
+    @Body()
+    body: GmailAuthDto,
+  ): Promise<IResponse<LoginResponse>> {
+    return successResponseHandler<LoginResponse>({
+      message: 'Logged in Successfully ✅',
+      data: await this.authenticationService.logInWithGmail(body),
     });
   }
 

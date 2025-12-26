@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import IUser from './user.interface';
+import { IUser } from './user.interface';
 import { CouponTypesEnum } from '../enums/coupon.enum';
 
 class ICoupon {

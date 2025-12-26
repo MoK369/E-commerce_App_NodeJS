@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import IUser from './user.interface';
+import { IUser } from './user.interface';
 import { OrderStatusEnum, PaymentTypesEnum } from '../enums';
 import ICoupon from './coupon.interface';
 import IProduct from './product.interface';

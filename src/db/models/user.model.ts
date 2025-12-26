@@ -16,6 +16,24 @@ import {
   UserRolesEnum,
 } from 'src/common';
 import { HydratedOtp } from './otp.model';
+import { type IProfileImage } from 'src/common/interfaces/user.interface';
+
+@Schema({
+  strictQuery: true,
+  timestamps: false,
+  _id: false,
+})
+class ProfileImage implements IProfileImage {
+  @Prop({ type: String, required: true })
+  url: string;
+
+  @Prop({
+    type: String,
+    enum: Object.values(ProvidersEnum),
+    default: ProvidersEnum.local,
+  })
+  provider: ProvidersEnum;
+}
 
 @Schema({
   strictQuery: true,
@@ -100,15 +118,9 @@ export class User implements IUser {
   changeCredentialsTime: Date;
 
   @Prop({
-    type: {
-      url: String,
-      provider: {
-        type: String,
-        enum: Object.values(ProvidersEnum),
-      },
-    },
+    type: ProfileImage,
   })
-  profileImage: { url: string; provider: ProvidersEnum };
+  profileImage: IProfileImage;
 
   @Virtual()
   otps: HydratedOtp[];

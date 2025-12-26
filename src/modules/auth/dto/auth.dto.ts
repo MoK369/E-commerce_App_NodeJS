@@ -34,6 +34,13 @@ export class SignUpBodyDto extends LoginBodyDto {
   confirmPassword: string;
 }
 
+export class GmailAuthDto {
+  @Matches(AppRegex.tokenRegex, { message: 'Invalid token format' })
+  @IsNotEmpty()
+  @IsString()
+  idToken: string;
+}
+
 export class ConfirmEmailBodyDto extends ResendConfirmEmailBodyDto {
   @Matches(AppRegex.otpRegex)
   otp: string;
@@ -51,7 +58,7 @@ export class VerifyForgetPasswordDto extends ForgetPasswordDto {
 }
 
 export class ResetForgetPasswordDto extends ForgetPasswordDto {
-  @Matches(AppRegex.passwordRegex, {message:"Password is week"})
+  @Matches(AppRegex.passwordRegex, { message: 'Password is week' })
   @IsNotEmpty()
   @IsString()
   password: string;
