@@ -1,5 +1,5 @@
-import {Types} from 'mongoose';
-import IUser from './user.interface';
+import { Types } from 'mongoose';
+import { IUser } from './user.interface';
 import { EmailEventsEnum } from '../enums';
 
 interface IOtp {
@@ -12,6 +12,8 @@ interface IOtp {
   createdBy: Types.ObjectId | IUser;
 
   type: EmailEventsEnum;
+
+  count?: number;
 
   createdAt?: Date;
   updatedAt?: Date;

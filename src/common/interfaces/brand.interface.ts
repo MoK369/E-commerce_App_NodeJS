@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import IUser from './user.interface';
+import { IUser } from './user.interface';
 
 class IBrand {
   id?: Types.ObjectId;
@@ -13,7 +13,7 @@ class IBrand {
   updatedBy?: Types.ObjectId | IUser;
 
   freezedAt?: Date;
-  restoredAt?:  Date;
+  restoredAt?: Date;
 
   createdAt?: Date;
   updatedAt?: Date;

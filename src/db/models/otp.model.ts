@@ -1,7 +1,14 @@
 import { MongooseModule, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types, Schema as MongooseSchema } from 'mongoose';
+import {
+  HydratedDocument,
+  Types,
+  Schema as MongooseSchema,
+  Query,
+} from 'mongoose';
 import { User } from './user.model';
 import { emailEvent, EmailEventsEnum, HashingUtil, IOtp } from 'src/common';
+import { OtpRepository } from '../repositories';
+import { ModuleRef } from '@nestjs/core';
 
 @Schema({ timestamps: true })
 export class Otp implements IOtp {
@@ -10,6 +17,9 @@ export class Otp implements IOtp {
 
   @Prop({ type: Date, required: true })
   expiresAt: Date;
+
+  @Prop({ type: Number, default: 0 })
+  count: number;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, required: true, ref: 'User' })
   createdBy: Types.ObjectId;
@@ -49,6 +59,8 @@ otpSchema.pre(
 
 otpSchema.post('save', function (doc, next) {
   const that = this as HydratedOtp & { wasNew: boolean; plainOtp: string };
+  console.log({ type: that.type });
+
   if (that.wasNew && that.plainOtp) {
     emailEvent.publish({
       eventName: that.type,
@@ -61,6 +73,51 @@ otpSchema.post('save', function (doc, next) {
   next();
 });
 
-export const OtpModel = MongooseModule.forFeature([
-  { name: Otp.name, schema: otpSchema },
+otpSchema.pre(['updateOne', 'findOneAndUpdate'], async function (next) {
+  const update = this.getUpdate() as Partial<IOtp>;
+  if (update.code && !HashingUtil.isHashed({ text: update.code })) {
+    this.$locals ??= {};
+    this.$locals.plainOtp = update.code;
+    update.code = await HashingUtil.generateHash({ plainText: update.code });
+  }
+  this.setUpdate(update);
+  next();
+});
+
+export const OtpModel = MongooseModule.forFeatureAsync([
+  {
+    name: Otp.name,
+    inject: [ModuleRef],
+    useFactory: function (moduleRef: ModuleRef) {
+      otpSchema.post(
+        ['updateOne', 'findOneAndUpdate'],
+        async function (this, doc, next) {
+          const otp = await moduleRef
+            .get(OtpRepository, {
+              strict: false,
+            })
+            .findOne({
+              filter: this.getFilter(),
+              options: {
+                projection: { type: 1, createdBy: 1 },
+                populate: [{ path: 'createdBy', select: 'email' }],
+              },
+            });
+
+          if (otp && this.$locals.plainOtp) {
+            emailEvent.publish({
+              eventName: otp.type,
+              payload: {
+                to: (otp.createdBy as unknown as User).email,
+                otp: this.$locals.plainOtp as string,
+              },
+            });
+          }
+
+          next();
+        },
+      );
+      return otpSchema;
+    },
+  },
 ]);

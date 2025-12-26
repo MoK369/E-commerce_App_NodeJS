@@ -8,7 +8,7 @@ import {
 import { HydratedOtp } from 'src/db';
 import IProduct from './product.interface';
 
-interface IUser {
+export interface IUser {
   id?: Types.ObjectId;
 
   firstName: string;
@@ -33,9 +33,12 @@ interface IUser {
 
   changeCredentialsTime?: Date;
 
-  profileImage?: { url: string; provider: ProvidersEnum };
+  profileImage?: IProfileImage;
 
   otps: HydratedOtp[];
+
+  lastResetPasswordAt: Date;
+  resetPasswordVerificationExpiresAt: Date;
 
   wishlist?: Types.ObjectId[] | IProduct[];
 
@@ -43,4 +46,7 @@ interface IUser {
   updatedAt?: Date;
 }
 
-export default IUser;
+export interface IProfileImage {
+  url: string;
+  provider: ProvidersEnum;
+}
