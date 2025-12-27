@@ -42,6 +42,11 @@ export interface IUser {
 
   wishlist?: Types.ObjectId[] | IProduct[];
 
+  updatedBy?: Types.ObjectId;
+
+  freezedAt?: Date;
+  restoredAt?: Date;
+
   createdAt?: Date;
   updatedAt?: Date;
 }

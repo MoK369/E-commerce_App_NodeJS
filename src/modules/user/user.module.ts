@@ -4,10 +4,13 @@ import UserService from './user.service';
 import { preAuthMiddleware } from 'src/common/middlewares/authentication.middleware';
 import { SharedAuthenticationModule } from 'src/common/modules';
 import { S3KeyService, S3Service } from 'src/common';
+import { CartModel, CartRepository, OrderModel, OrderRepository } from 'src/db';
 
 @Module({
   imports: [
     SharedAuthenticationModule,
+    CartModel,
+    OrderModel,
     // MulterModule.register({
     //   storage: diskStorage({
     //     destination(req, file, callback) {
@@ -25,7 +28,13 @@ import { S3KeyService, S3Service } from 'src/common';
   ],
   exports: [],
   controllers: [UserController],
-  providers: [UserService, S3Service, S3KeyService],
+  providers: [
+    UserService,
+    S3Service,
+    S3KeyService,
+    CartRepository,
+    OrderRepository,
+  ],
 })
 class UserModule implements NestModule {
   // configure(consumer: MiddlewareConsumer) {
