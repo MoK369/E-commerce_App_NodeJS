@@ -4,18 +4,22 @@ import {
   UserModel,
   RevokedTokenModel,
   RevokedTokenRepository,
+  OtpRepository,
+  OtpModel,
 } from 'src/db';
 import { IdService } from 'src/common';
 import { JwtService } from '@nestjs/jwt';
 import TokenService from 'src/common/services/security/token.security';
 
 @Module({
-  imports: [UserModel, RevokedTokenModel],
+  imports: [UserModel, RevokedTokenModel, OtpModel],
   exports: [
     UserModel,
     RevokedTokenModel,
+    OtpModel,
     UserRepository,
     RevokedTokenRepository,
+    OtpRepository,
     IdService,
     JwtService,
     TokenService,
@@ -24,6 +28,7 @@ import TokenService from 'src/common/services/security/token.security';
   providers: [
     UserRepository,
     RevokedTokenRepository,
+    OtpRepository,
     IdService,
     JwtService,
     TokenService,
