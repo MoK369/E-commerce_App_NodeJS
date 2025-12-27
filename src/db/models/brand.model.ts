@@ -31,10 +31,10 @@ export class Brand implements IBrand {
   @Prop({ type: String, required: true })
   image: string;
 
-  @Prop({ type: MongooseSchema, required: true, ref: 'User' })
+  @Prop({ type: MongooseSchema.Types.ObjectId, required: true, ref: 'User' })
   createdBy: Types.ObjectId;
 
-  @Prop({ type: MongooseSchema, ref: 'User' })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
   updatedBy: Types.ObjectId;
 
   @Prop({ type: Date })

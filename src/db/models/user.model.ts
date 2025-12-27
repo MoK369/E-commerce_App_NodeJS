@@ -13,6 +13,7 @@ import {
   IUser,
   LanguagesEnum,
   ProvidersEnum,
+  softDeleteQueryFunction,
   UserRolesEnum,
 } from 'src/common';
 import { HydratedOtp } from './otp.model';
@@ -133,6 +134,15 @@ export class User implements IUser {
 
   @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'Product', max: 500 })
   wishlist?: Types.ObjectId[] | IProduct[];
+
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
+  updatedBy: Types.ObjectId;
+
+  @Prop({ type: Date })
+  freezedAt?: Date;
+
+  @Prop({ type: Date })
+  restoredAt?: Date;
 }
 
 export type HydratedUser = HydratedDocument<User>;
@@ -144,6 +154,14 @@ userSchema.virtual('otps', {
   foreignField: 'createdBy',
   ref: 'Otp',
 });
+
+userSchema.pre(
+  ['find', 'findOne', 'updateOne', 'findOneAndUpdate', 'countDocuments'],
+  function (next) {
+    softDeleteQueryFunction(this);
+    next();
+  },
+);
 
 userSchema.virtual('id').get(function () {
   return this._id;
